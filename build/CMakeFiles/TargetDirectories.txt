@@ -1,0 +1,9 @@
+C:/Users/thoma/OneDrive/Desktop/Automata/build/CMakeFiles/Automata.dir
+C:/Users/thoma/OneDrive/Desktop/Automata/build/CMakeFiles/edit_cache.dir
+C:/Users/thoma/OneDrive/Desktop/Automata/build/CMakeFiles/rebuild_cache.dir
+C:/Users/thoma/OneDrive/Desktop/Automata/build/CMakeFiles/list_install_components.dir
+C:/Users/thoma/OneDrive/Desktop/Automata/build/CMakeFiles/install.dir
+C:/Users/thoma/OneDrive/Desktop/Automata/build/CMakeFiles/install/local.dir
+C:/Users/thoma/OneDrive/Desktop/Automata/build/CMakeFiles/install/strip.dir
+C:/Users/thoma/OneDrive/Desktop/Automata/build/CMakeFiles/Automata_autogen_timestamp_deps.dir
+C:/Users/thoma/OneDrive/Desktop/Automata/build/CMakeFiles/Automata_autogen.dir

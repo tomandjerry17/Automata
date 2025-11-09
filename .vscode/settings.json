@@ -1,5 +1,11 @@
 {
     "files.associations": {
-        "qtwidgets": "cpp"
+        "qtwidgets": "cpp",
+        "string": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "vector": "cpp",
+        "stack": "cpp",
+        "iomanip": "cpp"
     }
 }

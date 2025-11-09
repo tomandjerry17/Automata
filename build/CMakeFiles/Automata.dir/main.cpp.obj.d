@@ -1188,7 +1188,6 @@ CMakeFiles/Automata.dir/main.cpp.obj: \
  C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/stl_deque.h \
  C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/deque.tcc \
  C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/stl_queue.h \
- C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/iostream \
  C:/Users/thoma/OneDrive/Desktop/Automata/build/Automata_autogen/include/main.moc \
  C:/Qt/6.10.0/mingw_64/include/QtCore/qtmochelpers.h \
  C:/Qt/6.10.0/mingw_64/include/QtCore/qtmocconstants.h \

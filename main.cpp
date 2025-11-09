@@ -1,7 +1,4 @@
 // main.cpp
-// Build with CMakeLists above (Qt6 Widgets). C++17.
-// Single-file GUI demo: DFA/PDA visualizer for simple arithmetic expression validator.
-
 #include <QtWidgets>
 #include <vector>
 #include <string>
@@ -12,592 +9,842 @@
 #include <algorithm>
 #include <cctype>
 #include <cmath>
-#include <iostream>
+#include <numeric>
 using namespace std;
 
-/* ---------------------------
-   Backend: NFA / DFA / Lexer
-   (adapted / simplified from the earlier console example)
-   --------------------------- */
-
+// ---------------------------
+// Backend: Lexer / DFA / Parser
+// ---------------------------
 enum LabelKind { L_EPS, L_CHAR, L_DIGIT, L_LETTER, L_ALNUM_UNDERSCORE };
-
 struct NFATrans { int to; LabelKind kind; char ch; NFATrans(int t=0, LabelKind k=L_EPS, char c=0):to(t),kind(k),ch(c){} };
 struct NFAState { int id; vector<NFATrans> trans; NFAState(int i=0):id(i){} };
 struct NFAFragment { int start, accept; NFAFragment(int s=0,int a=0):start(s),accept(a){} };
+struct FullNFA { vector<NFAState> states; int start=-1; unordered_map<int,int> acceptToken; int newState(){int id=states.size(); states.emplace_back(id); return id;} };
 
-struct FullNFA {
-    vector<NFAState> states;
-    int start = -1;
-    unordered_map<int,int> acceptToken;
-    int newState(){ int id = (int)states.size(); states.emplace_back(id); return id; }
-};
-
-bool labelMatches(LabelKind kind, char c, char expectedChar=0) {
+bool labelMatches(LabelKind kind, char c, char expectedChar=0){
     switch(kind){
-        case L_CHAR: return c == expectedChar;
+        case L_CHAR: return c==expectedChar;
         case L_DIGIT: return isdigit((unsigned char)c);
         case L_LETTER: return isalpha((unsigned char)c);
-        case L_ALNUM_UNDERSCORE: return isalnum((unsigned char)c) || c == '_';
+        case L_ALNUM_UNDERSCORE: return isalnum((unsigned char)c)||c=='_';
         default: return false;
     }
 }
 
 NFAFragment makeAtomic(FullNFA &nfa, LabelKind kind, char ch=0){
-    int s = nfa.newState(), a = nfa.newState();
-    nfa.states[s].trans.emplace_back(a, kind, ch);
+    int s=nfa.newState(), a=nfa.newState();
+    nfa.states[s].trans.emplace_back(a,kind,ch);
     return {s,a};
 }
-NFAFragment concatFrag(FullNFA &nfa, const NFAFragment &a, const NFAFragment &b){
-    nfa.states[a.accept].trans.emplace_back(b.start, L_EPS, 0);
-    return {a.start, b.accept};
+NFAFragment concatFrag(FullNFA &nfa,const NFAFragment &a,const NFAFragment &b){
+    nfa.states[a.accept].trans.emplace_back(b.start,L_EPS,0);
+    return {a.start,b.accept};
 }
-NFAFragment unionFrag(FullNFA &nfa, const NFAFragment &a, const NFAFragment &b){
-    int s = nfa.newState(), x = nfa.newState();
-    nfa.states[s].trans.emplace_back(a.start, L_EPS, 0);
-    nfa.states[s].trans.emplace_back(b.start, L_EPS, 0);
-    nfa.states[a.accept].trans.emplace_back(x, L_EPS, 0);
-    nfa.states[b.accept].trans.emplace_back(x, L_EPS, 0);
+NFAFragment unionFrag(FullNFA &nfa,const NFAFragment&a,const NFAFragment&b){
+    int s=nfa.newState(),x=nfa.newState();
+    nfa.states[s].trans.emplace_back(a.start,L_EPS,0);
+    nfa.states[s].trans.emplace_back(b.start,L_EPS,0);
+    nfa.states[a.accept].trans.emplace_back(x,L_EPS,0);
+    nfa.states[b.accept].trans.emplace_back(x,L_EPS,0);
     return {s,x};
 }
-NFAFragment starFrag(FullNFA &nfa, const NFAFragment &f){
-    int s = nfa.newState(), a = nfa.newState();
-    nfa.states[s].trans.emplace_back(f.start, L_EPS, 0);
-    nfa.states[s].trans.emplace_back(a, L_EPS, 0);
-    nfa.states[f.accept].trans.emplace_back(f.start, L_EPS, 0);
-    nfa.states[f.accept].trans.emplace_back(a, L_EPS, 0);
+NFAFragment starFrag(FullNFA &nfa,const NFAFragment &f){
+    int s=nfa.newState(), a=nfa.newState();
+    nfa.states[s].trans.emplace_back(f.start,L_EPS,0);
+    nfa.states[s].trans.emplace_back(a,L_EPS,0);
+    nfa.states[f.accept].trans.emplace_back(f.start,L_EPS,0);
+    nfa.states[f.accept].trans.emplace_back(a,L_EPS,0);
     return {s,a};
 }
-NFAFragment plusFrag(FullNFA &nfa, const NFAFragment &f){
-    auto sf = starFrag(nfa, f);
-    return concatFrag(nfa, f, sf);
-}
-NFAFragment optFrag(FullNFA &nfa, const NFAFragment &f){
-    int s = nfa.newState(), a = nfa.newState();
-    nfa.states[s].trans.emplace_back(f.start, L_EPS, 0);
-    nfa.states[s].trans.emplace_back(a, L_EPS, 0);
-    nfa.states[f.accept].trans.emplace_back(a, L_EPS, 0);
+NFAFragment optFrag(FullNFA &nfa,const NFAFragment &f){
+    int s=nfa.newState(), a=nfa.newState();
+    nfa.states[s].trans.emplace_back(f.start,L_EPS,0);
+    nfa.states[s].trans.emplace_back(a,L_EPS,0);
+    nfa.states[f.accept].trans.emplace_back(a,L_EPS,0);
     return {s,a};
 }
 
-// tokens
+// Tokens
 enum TokenID { TK_ID=1, TK_NUMBER, TK_PLUS, TK_MINUS, TK_STAR, TK_SLASH, TK_LPAREN, TK_RPAREN, TK_WS };
-vector<string> tokenNames = {"", "ID","NUMBER","+","-","*","/","("," )","WS"};
+vector<string> tokenNames = {"", "ID","NUMBER","+","-","*","/","(",")","WS"};
 
 FullNFA buildCombinedNFA(){
-    FullNFA nfa; nfa.start = nfa.newState();
-    auto insert = [&](NFAFragment frag, int tok){
-        nfa.states[nfa.start].trans.emplace_back(frag.start, L_EPS, 0);
-        nfa.acceptToken[frag.accept] = tok;
-    };
-
-    auto letter = makeAtomic(nfa, L_LETTER);
-    auto alnumu = makeAtomic(nfa, L_ALNUM_UNDERSCORE);
-    auto idfrag = concatFrag(nfa, letter, starFrag(nfa, alnumu));
-    insert(idfrag, TK_ID);
-
-    auto digit = makeAtomic(nfa, L_DIGIT);
-    auto digitsPlus = plusFrag(nfa, digit);
-    auto dot = makeAtomic(nfa, L_CHAR, '.');
-    auto frac = concatFrag(nfa, dot, digitsPlus);
-    auto numfrag = concatFrag(nfa, digitsPlus, optFrag(nfa, frac));
-    insert(numfrag, TK_NUMBER);
-
-    insert(makeAtomic(nfa, L_CHAR, '+'), TK_PLUS);
-    insert(makeAtomic(nfa, L_CHAR, '-'), TK_MINUS);
-    insert(makeAtomic(nfa, L_CHAR, '*'), TK_STAR);
-    insert(makeAtomic(nfa, L_CHAR, '/'), TK_SLASH);
-    insert(makeAtomic(nfa, L_CHAR, '('), TK_LPAREN);
-    insert(makeAtomic(nfa, L_CHAR, ')'), TK_RPAREN);
-
-    // whitespace: space, tab, newline, carriage return
-    auto sp = makeAtomic(nfa, L_CHAR, ' ');
-    auto tab = makeAtomic(nfa, L_CHAR, '\t');
-    auto nl = makeAtomic(nfa, L_CHAR, '\n');
-    auto cr = makeAtomic(nfa, L_CHAR, '\r');
-    auto s1 = unionFrag(nfa, sp, tab);
-    auto s2 = unionFrag(nfa, nl, cr);
-    auto sAll = unionFrag(nfa, s1, s2);
-    auto wsp = plusFrag(nfa, sAll);
-    insert(wsp, TK_WS);
-
+    FullNFA nfa; nfa.start=nfa.newState();
+    auto insert=[&](NFAFragment f,int tk){nfa.states[nfa.start].trans.emplace_back(f.start,L_EPS,0);nfa.acceptToken[f.accept]=tk;};
+    
+    // ID: letter (alnum|_)*
+    auto letter=makeAtomic(nfa,L_LETTER); 
+    auto alnum=makeAtomic(nfa,L_ALNUM_UNDERSCORE);
+    insert(concatFrag(nfa,letter,starFrag(nfa,alnum)),TK_ID);
+    
+    // NUMBER: digit+ (. digit+)?
+    // This accepts: 123, 3.14, 0.5, etc.
+    auto digit=makeAtomic(nfa,L_DIGIT);
+    auto digitPlus = concatFrag(nfa, digit, starFrag(nfa, makeAtomic(nfa,L_DIGIT))); // digit+
+    
+    auto dot = makeAtomic(nfa,L_CHAR,'.');
+    auto fractional = concatFrag(nfa, dot, concatFrag(nfa, makeAtomic(nfa,L_DIGIT), starFrag(nfa, makeAtomic(nfa,L_DIGIT)))); // . digit+
+    auto optFractional = optFrag(nfa, fractional); // (. digit+)?
+    
+    auto numberFrag = concatFrag(nfa, digitPlus, optFractional); // digit+ (. digit+)?
+    insert(numberFrag, TK_NUMBER);
+    
+    // Operators
+    insert(makeAtomic(nfa,L_CHAR,'+'),TK_PLUS);
+    insert(makeAtomic(nfa,L_CHAR,'-'),TK_MINUS);
+    insert(makeAtomic(nfa,L_CHAR,'*'),TK_STAR);
+    insert(makeAtomic(nfa,L_CHAR,'/'),TK_SLASH);
+    insert(makeAtomic(nfa,L_CHAR,'('),TK_LPAREN);
+    insert(makeAtomic(nfa,L_CHAR,')'),TK_RPAREN);
+    
+    // Whitespace: ( | \t)*
+    insert(starFrag(nfa,unionFrag(nfa,makeAtomic(nfa,L_CHAR,' '),makeAtomic(nfa,L_CHAR,'\t'))),TK_WS);
+    
     return nfa;
 }
 
-// DFA
 struct DFAState { int id=0; unordered_map<char,int> trans; bool accept=false; vector<int> tokens; set<int> nfaStates; };
-set<int> epsClosure(const FullNFA &nfa, const set<int>& in){
-    set<int> res = in; vector<int> st(in.begin(), in.end());
-    while(!st.empty()){
-        int s = st.back(); st.pop_back();
-        for(auto &t : nfa.states[s].trans){
-            if (t.kind == L_EPS && !res.count(t.to)){ res.insert(t.to); st.push_back(t.to); }
-        }
-    }
-    return res;
-}
-set<int> moveVia(const FullNFA &nfa, const set<int>& S, char c){
-    set<int> res;
-    for(int s : S){
-        for(auto &t : nfa.states[s].trans){
-            if (t.kind == L_CHAR && labelMatches(t.kind, c, t.ch)) res.insert(t.to);
-            if (t.kind == L_DIGIT && labelMatches(t.kind, c)) res.insert(t.to);
-            if (t.kind == L_LETTER && labelMatches(t.kind, c)) res.insert(t.to);
-            if (t.kind == L_ALNUM_UNDERSCORE && labelMatches(t.kind, c)) res.insert(t.to);
-        }
-    }
-    return res;
-}
-vector<char> allChars(){ vector<char> v; for(int i=0;i<128;i++) v.push_back((char)i); return v; }
-
+set<int> epsClosure(const FullNFA &nfa,const set<int>&in){set<int>res=in;vector<int>st(in.begin(),in.end());while(!st.empty()){int s=st.back();st.pop_back();for(auto&t:nfa.states[s].trans)if(t.kind==L_EPS&&!res.count(t.to)){res.insert(t.to);st.push_back(t.to);}}return res;}
+set<int> moveVia(const FullNFA &nfa,const set<int>&S,char c){set<int>res;for(int s:S)for(auto&t:nfa.states[s].trans)if(labelMatches(t.kind,c,t.ch))res.insert(t.to);return res;}
+vector<char> allChars(){vector<char>v;for(int i=0;i<128;i++)v.push_back((char)i);return v;}
 vector<DFAState> subsetConstruct(const FullNFA &nfa){
-    vector<DFAState> dfa; map<set<int>, int> idMap; queue<set<int>> q;
-    set<int> s0 = { nfa.start };
-    s0 = epsClosure(nfa, s0);
-    idMap[s0] = 0; dfa.push_back(DFAState()); dfa[0].id = 0; dfa[0].nfaStates = s0;
-    for(int s : s0) if (nfa.acceptToken.count(s)) { dfa[0].accept = true; dfa[0].tokens.push_back(nfa.acceptToken.at(s)); }
-    q.push(s0);
-    auto chars = allChars();
+    vector<DFAState>dfa;map<set<int>,int>id;queue<set<int>>q;set<int>s0=epsClosure(nfa,{nfa.start});id[s0]=0;dfa.push_back({0});dfa[0].nfaStates=s0;
+    for(int s:s0) if(nfa.acceptToken.count(s)){dfa[0].accept=true;dfa[0].tokens.push_back(nfa.acceptToken.at(s));}
+    q.push(s0); auto chars=allChars();
     while(!q.empty()){
-        auto S = q.front(); q.pop();
-        int sid = idMap[S];
-        for(char c : chars){
-            auto moved = moveVia(nfa, S, c);
-            if (moved.empty()) continue;
-            auto U = epsClosure(nfa, moved);
-            if (!idMap.count(U)){
-                int nid = dfa.size();
-                idMap[U] = nid;
-                dfa.push_back(DFAState());
-                dfa[nid].id = nid; dfa[nid].nfaStates = U;
-                for(int s : U) if (nfa.acceptToken.count(s)) { dfa[nid].accept = true; dfa[nid].tokens.push_back(nfa.acceptToken.at(s)); }
+        auto S=q.front(); q.pop(); int sid=id[S];
+        for(char c:chars){
+            auto mv=moveVia(nfa,S,c); if(mv.empty()) continue;
+            auto U=epsClosure(nfa,mv); if(!id.count(U)){
+                int nid=dfa.size(); id[U]=nid; dfa.push_back({nid}); dfa[nid].nfaStates=U;
+                for(int s:U) if(nfa.acceptToken.count(s)){dfa[nid].accept=true; dfa[nid].tokens.push_back(nfa.acceptToken.at(s));}
                 q.push(U);
             }
-            dfa[sid].trans[c] = idMap[U];
+            dfa[sid].trans[c]=id[U];
         }
     }
     return dfa;
 }
 
 struct Token { int id; string lexeme; int pos; };
-vector<Token> tokenize(const vector<DFAState> &dfa, const string &input){
-    vector<Token> out; int n = input.size(), pos = 0;
-    while(pos < n){
-        int state = 0; int lastAccept = -1; int lastAcceptPos = pos;
-        int cur = pos;
-        while(cur < n){
-            char c = input[cur];
-            auto it = dfa[state].trans.find(c);
-            if (it == dfa[state].trans.end()) break;
-            state = it->second;
-            if (dfa[state].accept){ lastAccept = state; lastAcceptPos = cur+1; }
-            cur++;
-        }
-        if (lastAccept == -1){
-            // lexical error
-            return {};
-        }
-        // choose token (first by sorted token id)
-        vector<int> cand = dfa[lastAccept].tokens;
-        sort(cand.begin(), cand.end());
-        int tk = cand.front();
-        string lex = input.substr(pos, lastAcceptPos - pos);
-        if (tk != TK_WS) out.push_back({tk, lex, pos});
-        pos = lastAcceptPos;
+vector<Token> tokenize(const vector<DFAState>&dfa,const string&in){
+    vector<Token>out;int n=in.size(),pos=0;
+    while(pos<n){
+        int s=0,last=-1,lastPos=pos,cur=pos;
+        while(cur<n){char c=in[cur];auto it=dfa[s].trans.find(c);if(it==dfa[s].trans.end())break; s=it->second; if(dfa[s].accept){last=s;lastPos=cur+1;} cur++;}
+        if(last==-1) return {};
+        vector<int>cand=dfa[last].tokens; sort(cand.begin(),cand.end());
+        int tk=cand.front(); string lex=in.substr(pos,lastPos-pos);
+        if(tk!=TK_WS) out.push_back({tk,lex,pos});
+        pos=lastPos;
     }
-    out.push_back({0,"$", (int)input.size()});
+    out.push_back({0,"$", (int)in.size()});
     return out;
 }
 
-/* ---------------------------
-   Parser (LL(1)) — same grammar as before
-   E -> T E'
-   E' -> + T E' | - T E' | ε
-   T -> F T'
-   T' -> * F T' | / F T' | ε
-   F -> + F | - F | ( E ) | ID | NUMBER
-   --------------------------- */
-
-struct Production { string lhs; vector<string> rhs; Production(string l="", vector<string> r=vector<string>()):lhs(l),rhs(r){} };
-
-vector<Production> prods;
-map<pair<string,string>, int> parseTable;
-string startSymbol = "E";
+// ---------------------------
+// Parser
+// ---------------------------
+struct Production { string lhs; vector<string> rhs; };
+vector<Production> prods; map<pair<string,string>,int> table; string startSym="E";
 
 string tokenToTerm(int id){
-    if (id == TK_ID) return "ID";
-    if (id == TK_NUMBER) return "NUMBER";
-    if (id == TK_PLUS) return "+";
-    if (id == TK_MINUS) return "-";
-    if (id == TK_STAR) return "*";
-    if (id == TK_SLASH) return "/";
-    if (id == TK_LPAREN) return "(";
-    if (id == TK_RPAREN) return ")";
-    if (id == 0) return "$";
-    return "";
+    switch(id){case TK_ID: return "ID"; case TK_NUMBER: return "NUMBER"; case TK_PLUS: return "+"; case TK_MINUS: return "-";
+        case TK_STAR: return "*"; case TK_SLASH: return "/"; case TK_LPAREN: return "("; case TK_RPAREN: return ")"; case 0: return "$"; default: return "";}
 }
-
-bool isTerminalSym(const string &s){
-    if (s == "$") return true;
-    if (s == "ID" || s == "NUMBER") return true;
-    if (s == "+"|| s=="-"|| s=="*"|| s=="/"|| s=="("|| s==")") return true;
-    return false;
-}
-
+bool isTerminal(const string&s){return s=="$"||s=="ID"||s=="NUMBER"||s=="+"||s=="-"||s=="*"||s=="/"||s=="("||s==")";}
 void fillGrammar(){
-    prods.clear();
-    parseTable.clear();
-    prods.emplace_back("E", vector<string>{"T","E'"}); //0
-    prods.emplace_back("E'", vector<string>{"+","T","E'"}); //1
-    prods.emplace_back("E'", vector<string>{"-","T","E'"}); //2
-    prods.emplace_back("E'", vector<string>{"ε"}); //3
-    prods.emplace_back("T", vector<string>{"F","T'"}); //4
-    prods.emplace_back("T'", vector<string>{"*","F","T'"}); //5
-    prods.emplace_back("T'", vector<string>{"/","F","T'"}); //6
-    prods.emplace_back("T'", vector<string>{"ε"}); //7
-    prods.emplace_back("F", vector<string>{"+","F"}); //8 unary +
-    prods.emplace_back("F", vector<string>{"-","F"}); //9 unary -
-    prods.emplace_back("F", vector<string>{"(","E",")"}); //10
-    prods.emplace_back("F", vector<string>{"ID"}); //11
-    prods.emplace_back("F", vector<string>{"NUMBER"}); //12
-
-    vector<string> look = {"+","-","(","ID","NUMBER"};
-    for(auto &t: look) parseTable[{"E",t}] = 0;
-    parseTable[{"E'","+"}] = 1; parseTable[{"E'","-"}] = 2;
-    parseTable[{"E'",")"}] = 3; parseTable[{"E'","$"}] = 3;
-    for(auto &t: look) parseTable[{"T",t}] = 4;
-    parseTable[{"T'","*"}] = 5; parseTable[{"T'","/"}] = 6;
-    parseTable[{"T'","+"}] = 7; parseTable[{"T'","-"}] = 7; parseTable[{"T'",")"}] = 7; parseTable[{"T'","$"}] = 7;
-    parseTable[{"F","+"}] = 8; parseTable[{"F","-"}] = 9; parseTable[{"F","("}] = 10; parseTable[{"F","ID"}] = 11; parseTable[{"F","NUMBER"}] = 12;
+    prods={{"E",{"T","E'"}},{"E'",{"+","T","E'"}},{"E'",{"-","T","E'"}},{"E'",{"ε"}},
+           {"T",{"F","T'"}},{"T'",{"*","F","T'"}},{"T'",{"/","F","T'"}},{"T'",{"ε"}},
+           {"F",{"+","F"}},{"F",{"-","F"}},{"F",{"(","E",")"}},{"F",{"ID"}},{"F",{"NUMBER"}}};
+    vector<string>look={"+","-","(","ID","NUMBER"};
+    for(auto&t:look) table[{"E",t}]=0;
+    table[{"E'","+"}]=1; table[{"E'","-"}]=2; table[{"E'",")"}]=3; table[{"E'","$"}]=3;
+    for(auto&t:look) table[{"T",t}]=4;
+    table[{"T'","*"}]=5; table[{"T'","/"}]=6; for(string t:{"+","-","$",")"}) table[{"T'",t}]=7;
+    table[{"F","+"}]=8; table[{"F","-"}]=9; table[{"F","("}]=10; table[{"F","ID"}]=11; table[{"F","NUMBER"}]=12;
 }
 
-/* ---------------------------
-   Qt GUI: MainWindow with controls and a QGraphicsView to draw DFA
-   --------------------------- */
-
+// ---------------------------
+// Qt GUI - Enhanced Visualization
+// ---------------------------
 class AutomataView : public QGraphicsView {
     Q_OBJECT
+
+private:
+    void fitSceneInView() {
+        if (!scene() || scene()->items().isEmpty()) return;
+        QRectF rect = scene()->itemsBoundingRect().adjusted(-100, -100, 100, 100);
+        fitInView(rect, Qt::KeepAspectRatio);
+    }
+
+protected:
+    void resizeEvent(QResizeEvent* event) override {
+        QGraphicsView::resizeEvent(event);
+        fitSceneInView(); // automatically adjust when window resizes
+    }
+
 public:
-    AutomataView(QWidget *parent=nullptr) : QGraphicsView(parent) {
+    AutomataView(QWidget* parent = nullptr) : QGraphicsView(parent) {
         setScene(new QGraphicsScene(this));
         setRenderHint(QPainter::Antialiasing);
+        setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     }
 
-    // Build a simple layout of DFA states (circle nodes) from DFA vector
-    void buildFromDFA(const vector<DFAState> &dfa) {
+    void buildFromDFA(const vector<DFAState>& dfa_) {
+        dfa = dfa_;
         scene()->clear();
         nodes.clear();
-        int n = (int)dfa.size();
-        if (n==0) return;
-        // place nodes in circle
-        int W = 600, H = 300;
-        double cx = W/2.0, cy = H/2.0, R = min(W,H)/2.5;
-        for(int i=0;i<n;i++){
-            double ang = 2.0*M_PI*i/n;
-            double x = cx + R*cos(ang);
-            double y = cy + R*sin(ang);
-            QGraphicsEllipseItem *e = scene()->addEllipse(x-25,y-25,50,50, QPen(Qt::black), QBrush(Qt::white));
-            QGraphicsTextItem *t = scene()->addText(QString::number(i));
-            t->setPos(x-8,y-12);
-            nodes.push_back({x,y,e,t});
-        }
-        // edges (draw simple straight lines)
-        for(int i=0;i<n;i++){
-            for(auto &kv : dfa[i].trans){
-                int j = kv.second;
-                // draw arrow from i to j if unique small offset
-                double x1 = nodes[i].x, y1 = nodes[i].y;
-                double x2 = nodes[j].x, y2 = nodes[j].y;
-                QGraphicsLineItem *line = scene()->addLine(x1,y1,x2,y2, QPen(Qt::darkGray));
-                Q_UNUSED(line);
+        edges.clear();
+        edgeLabels.clear();
+        if(dfa.empty()) return;
+
+        // BFS for layers
+        map<int,int> layer;
+        queue<int> q;
+        set<int> visited;
+        q.push(0); layer[0]=0; visited.insert(0);
+
+        while(!q.empty()) {
+            int s = q.front(); q.pop();
+            int l = layer[s];
+            for(auto &kv : dfa[s].trans){
+                int t = kv.second;
+                if(!visited.count(t)){
+                    visited.insert(t);
+                    layer[t] = l+1;
+                    q.push(t);
+                }
             }
         }
-        fitInView(scene()->itemsBoundingRect(), Qt::KeepAspectRatio);
+
+        map<int, vector<int>> layers;
+        int maxLayer=0;
+        for(auto &p:layer){
+            layers[p.second].push_back(p.first);
+            maxLayer = max(maxLayer, p.second);
+        }
+
+        int W=1600, H=800;
+        int verticalSpacing = std::max(150, H / (maxLayer + 2)); // Minimum 150px between layers
+
+        // Create nodes with improved positioning
+        for (auto& lv : layers) {
+            int y = verticalSpacing * (lv.first + 1);
+            int nStates = lv.second.size();
+            double horizontalSpacing = std::max(150.0, W / (nStates + 1.0)); // Minimum 200px between nodes
+
+            for (int i = 0; i < nStates; i++) {
+                double x = horizontalSpacing * (i + 1);
+                int stateId = lv.second[i];
+
+                // Create state circle
+               QGraphicsEllipseItem* e = scene()->addEllipse(x - 30, double(y) - 30, 60, 60);
+                e->setPen(QPen(Qt::black, 2));
+                e->setBrush(QBrush(Qt::white));
+
+                // Double circle for accept states
+                if (dfa[stateId].accept) {
+                    QGraphicsEllipseItem* inner = scene()->addEllipse(x - 25, double(y) - 25, 50, 50, QPen(Qt::black, 2));
+                    e->setBrush(QBrush(QColor(144, 238, 144))); // Light green
+                }
+
+                // State label with token info
+                QString labelText = QString("q%1").arg(stateId);
+                if(dfa[stateId].accept && !dfa[stateId].tokens.empty()) {
+                    labelText += "\n[";
+                    for(size_t j = 0; j < dfa[stateId].tokens.size(); j++) {
+                        if(j > 0) labelText += ",";
+                        labelText += QString::fromStdString(tokenNames[dfa[stateId].tokens[j]]);
+                    }
+                    labelText += "]";
+                }
+
+                QGraphicsTextItem* t = scene()->addText(labelText);
+                QFont font = t->font();
+                font.setPointSize(9);
+                font.setBold(true);
+                t->setFont(font);
+                QRectF bounds = t->boundingRect();
+                t->setPos(x - bounds.width()/2, double(y) - bounds.height()/2);
+
+                nodes[stateId] = {x, double(y), e, t};
+            }
+        }
+
+        // Add start arrow
+        if(nodes.count(0)) {
+            auto& startNode = nodes[0];
+            double arrowStartX = startNode.x - 60;
+            double arrowStartY = startNode.y;
+            QLineF line(arrowStartX, arrowStartY, startNode.x - 32, startNode.y);
+            scene()->addLine(line, QPen(Qt::darkBlue, 3));
+            drawArrowHead(arrowStartX + 20, arrowStartY, startNode.x - 32, startNode.y, Qt::darkBlue);
+            
+            QGraphicsTextItem* startLabel = scene()->addText("START");
+            QFont font = startLabel->font();
+            font.setPointSize(8);
+            font.setBold(true);
+            startLabel->setFont(font);
+            startLabel->setDefaultTextColor(Qt::darkBlue);
+            startLabel->setPos(arrowStartX - 10, arrowStartY - 25);
+        }
+
+        // Group transitions by (from, to) pair
+        map<pair<int,int>, vector<char>> edgeMap;
+        for(int i=0;i<dfa.size();i++)
+            for(auto &kv:dfa[i].trans)
+                edgeMap[{i, kv.second}].push_back(kv.first);
+
+        // Draw edges with better labels
+        for(auto &kv:edgeMap){
+            int fromId = kv.first.first;
+            int toId = kv.first.second;
+            auto &chars = kv.second;
+
+            auto &from = nodes[fromId];
+            auto &to = nodes[toId];
+
+            QPainterPath path;
+            QPointF labelPos;
+            
+            if(fromId==toId){
+                // Self-loop positioned above the node
+                double loopRadius = 35;
+                path.moveTo(from.x - 10, from.y - 25);
+                path.arcTo(from.x - loopRadius, from.y - 25 - loopRadius*2, loopRadius*2, loopRadius*2, -30, 240);
+                labelPos = QPointF(from.x, from.y - 80);
+            } else {
+                // Straight line between nodes
+                double dx = to.x - from.x;
+                double dy = to.y - from.y;
+                double dist = sqrt(dx*dx + dy*dy);
+                
+                // Adjust start and end points to node boundary
+                double angle = atan2(dy, dx);
+                double radius = 30; // Node radius
+                QPointF start(from.x + radius * cos(angle), from.y + radius * sin(angle));
+                QPointF end(to.x - radius * cos(angle), to.y - radius * sin(angle));
+                
+                // Straight line
+                path.moveTo(start);
+                path.lineTo(end);
+                
+                // Label offset to the side to avoid edge overlap
+                double midX = (start.x() + end.x())/2;
+                double midY = (start.y() + end.y())/2;
+                // Offset perpendicular to the edge
+                double perpAngle = angle + M_PI/2;
+                labelPos = QPointF(midX + 20*cos(perpAngle), midY + 20*sin(perpAngle));
+            }
+
+            QPen edgePen(QColor(80, 80, 80), 2);
+            QGraphicsPathItem* item = scene()->addPath(path, edgePen);
+            edges.push_back(item);
+
+            // Draw arrow head
+            QPointF pEnd = path.pointAtPercent(0.95);
+            QPointF pBefore = path.pointAtPercent(0.85);
+            drawArrowHead(pBefore.x(), pBefore.y(), pEnd.x(), pEnd.y(), QColor(80, 80, 80));
+
+            // Create compact label
+            QString labelText = formatEdgeLabel(chars);
+            QGraphicsTextItem* lbl = scene()->addText(labelText);
+            QFont font = lbl->font();
+            font.setPointSize(8);
+            lbl->setFont(font);
+            lbl->setDefaultTextColor(Qt::blue);
+            
+            // Position label near the curve
+            QRectF lblBounds = lbl->boundingRect();
+            lbl->setPos(labelPos.x() - lblBounds.width()/2, labelPos.y() - lblBounds.height()/2);
+            
+            edgeLabels.push_back(lbl);
+        }
+
+        scene()->setSceneRect(scene()->itemsBoundingRect());
+        fitSceneInView();  // dynamic fit
     }
 
-    void highlightState(int id) {
-        // reset all
-        for(auto &n : nodes){ n.ellipse->setBrush(QBrush(Qt::white)); }
-        if (id >=0 && id < (int)nodes.size()){
-            nodes[id].ellipse->setBrush(QBrush(Qt::yellow));
+    void highlightState(int id){
+        // Reset all nodes
+        for(auto &p:nodes){
+            int stateId = p.first;
+            auto &n = p.second;
+            bool isAccept = dfa[stateId].accept;
+            n.e->setBrush(isAccept ? QBrush(QColor(144, 238, 144)) : QBrush(Qt::white));
+            n.e->setPen(QPen(Qt::black, 2));
+        }
+        
+        // Highlight active state
+        if(id >= 0 && nodes.count(id)){
+            nodes[id].e->setBrush(QBrush(QColor(255, 255, 100))); // Yellow
+            nodes[id].e->setPen(QPen(Qt::red, 3));
+        }
+        activeState = id;
+    }
+
+    void highlightTransition(int fromId, int toId, char c) {
+        // Reset all edges
+        for(auto* edge : edges) {
+            edge->setPen(QPen(QColor(80, 80, 80), 2));
+        }
+        
+        // Find and highlight the specific transition
+        // This is a simplified version - you might want to store edge info for precise highlighting
+        if(nodes.count(fromId) && nodes.count(toId)) {
+            highlightState(toId);
         }
     }
 
 private:
-    struct Node { double x,y; QGraphicsEllipseItem* ellipse; QGraphicsTextItem* label; };
-    vector<Node> nodes;
+    struct Node { double x,y; QGraphicsEllipseItem* e; QGraphicsTextItem* t; };
+    map<int, Node> nodes;
+    vector<QGraphicsPathItem*> edges;
+    vector<QGraphicsTextItem*> edgeLabels;
+    int activeState = -1;
+    vector<DFAState> dfa;
+
+    QString formatEdgeLabel(const vector<char>& chars) {
+        if(chars.empty()) return "";
+        
+        // Sort and categorize characters
+        vector<char> sorted = chars;
+        sort(sorted.begin(), sorted.end());
+        
+        // Check for character classes
+        set<char> charSet(sorted.begin(), sorted.end());
+        
+        bool hasAllDigits = true;
+        for(char c = '0'; c <= '9'; c++) {
+            if(!charSet.count(c)) { hasAllDigits = false; break; }
+        }
+        
+        bool hasAllLower = true;
+        for(char c = 'a'; c <= 'z'; c++) {
+            if(!charSet.count(c)) { hasAllLower = false; break; }
+        }
+        
+        bool hasAllUpper = true;
+        for(char c = 'A'; c <= 'Z'; c++) {
+            if(!charSet.count(c)) { hasAllUpper = false; break; }
+        }
+        
+        QStringList parts;
+        if(hasAllDigits && hasAllLower && hasAllUpper && charSet.count('_')) {
+            return "[alnum_]";
+        } else if(hasAllDigits && hasAllLower && hasAllUpper) {
+            return "[alnum]";
+        } else if(hasAllLower && hasAllUpper) {
+            return "[a-zA-Z]";
+        } else if(hasAllDigits) {
+            return "[0-9]";
+        } else if(hasAllLower) {
+            return "[a-z]";
+        } else if(hasAllUpper) {
+            return "[A-Z]";
+        }
+        
+        // Otherwise, show individual characters (limit to reasonable number)
+        QString result;
+        for(size_t i = 0; i < sorted.size() && i < 10; i++) {
+            char c = sorted[i];
+            if(c == ' ') result += "␣";
+            else if(c == '\t') result += "⇥";
+            else if(c == '\n') result += "↵";
+            else result += QChar(c);
+            
+            if(i < sorted.size() - 1) result += ",";
+        }
+        if(sorted.size() > 10) result += "...";
+        return result;
+    }
+
+    void drawArrowHead(double x1, double y1, double x2, double y2, QColor color = QColor(80, 80, 80)){
+        QLineF line(QPointF(x1,y1), QPointF(x2,y2));
+        double angle = std::atan2(-line.dy(), line.dx());
+        const double arrowSize = 12;
+        QPointF p1 = line.p2() - QPointF(arrowSize*cos(angle+M_PI/6), -arrowSize*sin(angle+M_PI/6));
+        QPointF p2 = line.p2() - QPointF(arrowSize*cos(angle-M_PI/6), -arrowSize*sin(angle-M_PI/6));
+        QPolygonF arrowHead;
+        arrowHead << line.p2() << p1 << p2;
+        scene()->addPolygon(arrowHead, QPen(color), QBrush(color));
+    }
 };
 
-/* MainWindow */
-class MainWindow : public QWidget {
+// ---------------------------
+// MainWindow
+// ---------------------------
+class MainWindow:public QWidget{
     Q_OBJECT
 public:
-    MainWindow(QWidget *parent=nullptr) : QWidget(parent) {
-        setWindowTitle("Expr Validator - DFA/PDA Visualizer");
+    MainWindow(QWidget*p=nullptr):QWidget(p){
+        setWindowTitle("Expression Automata Visualizer");
+        input=new QLineEdit();
+        input->setPlaceholderText("Enter expression (e.g., x+y*2)");
+        
+        auto *lexBtn=new QPushButton("Lex"),*parseBtn=new QPushButton("Parse");
+        auto *animBtn=new QPushButton("Animate DFA"),*stopBtn=new QPushButton("Stop");
+        auto *resetBtn=new QPushButton("Reset DFA"),*clearBtn=new QPushButton("Clear Output");
+        auto *stepParseBtn=new QPushButton("Step Parse"),*resetParseBtn=new QPushButton("Reset Parse");
+        
+        tokensBox=new QListWidget(); 
+        stackBox=new QListWidget(); 
+        trace=new QTextEdit(); 
+        trace->setReadOnly(true);
+        
+        // Input display for animation
+        inputDisplay = new QLabel();
+        inputDisplay->setStyleSheet("QLabel { background-color: #f0f0f0; padding: 5px; font-family: monospace; font-size: 12pt; }");
+        inputDisplay->setAlignment(Qt::AlignLeft);
 
-        // UI elements
-        inputEdit = new QLineEdit();
-        lexButton = new QPushButton("Lex");
-        parseButton = new QPushButton("Parse");
-        stepDfaButton = new QPushButton("Step DFA");
-        resetDfaButton = new QPushButton("Reset DFA");
-        stepParseButton = new QPushButton("Step Parse");
-        resetParseButton = new QPushButton("Reset Parse");
+        auto *top=new QHBoxLayout(); 
+        top->addWidget(new QLabel("Expression:")); 
+        top->addWidget(input);
+        top->addWidget(lexBtn); 
+        top->addWidget(parseBtn); 
+        top->addWidget(clearBtn);
 
-        tokenList = new QListWidget();
-        traceBox = new QTextEdit(); traceBox->setReadOnly(true);
-        stackList = new QListWidget();
+        auto *dfaL=new QVBoxLayout(); 
+        dfaL->addWidget(new QLabel("DFA Visualization:"));
+        dfaL->addWidget(inputDisplay);
+        view=new AutomataView(); 
+        view->setMinimumHeight(400);
+        dfaL->addWidget(view);
+        
+        auto *dfaBtns=new QHBoxLayout(); 
+        dfaBtns->addWidget(animBtn); 
+        dfaBtns->addWidget(stopBtn); 
+        dfaBtns->addWidget(resetBtn); 
+        dfaL->addLayout(dfaBtns);
 
-        auto *topLayout = new QHBoxLayout();
-        topLayout->addWidget(new QLabel("Expression:"));
-        topLayout->addWidget(inputEdit);
-        topLayout->addWidget(lexButton);
-        topLayout->addWidget(parseButton);
+        auto *right=new QVBoxLayout(); 
+        right->addWidget(new QLabel("Tokens:")); 
+        right->addWidget(tokensBox);
+        right->addWidget(new QLabel("Parser Stack:")); 
+        right->addWidget(stackBox);
+        auto *pBtns=new QHBoxLayout(); 
+        pBtns->addWidget(stepParseBtn); 
+        pBtns->addWidget(resetParseBtn); 
+        right->addLayout(pBtns);
+        right->addWidget(new QLabel("Trace:")); 
+        right->addWidget(trace);
 
-        auto *dfaLayout = new QVBoxLayout();
-        automataView = new AutomataView();
-        automataView->setMinimumSize(640, 320);
-        dfaLayout->addWidget(automataView);
-        auto *dfaBtns = new QHBoxLayout();
-        dfaBtns->addWidget(stepDfaButton);
-        dfaBtns->addWidget(resetDfaButton);
-        dfaLayout->addLayout(dfaBtns);
+        auto *main=new QHBoxLayout(this); 
+        auto *left=new QVBoxLayout(); 
+        left->addLayout(top); 
+        left->addLayout(dfaL); 
+        main->addLayout(left,3); 
+        main->addLayout(right,1);
 
-        auto *rightLayout = new QVBoxLayout();
-        rightLayout->addWidget(new QLabel("Tokens:"));
-        rightLayout->addWidget(tokenList);
-        rightLayout->addWidget(new QLabel("Parser Stack:"));
-        rightLayout->addWidget(stackList);
-        auto *parseBtns = new QHBoxLayout();
-        parseBtns->addWidget(stepParseButton);
-        parseBtns->addWidget(resetParseButton);
-        rightLayout->addLayout(parseBtns);
-        rightLayout->addWidget(new QLabel("Trace:"));
-        rightLayout->addWidget(traceBox);
-
-        auto *mainLayout = new QHBoxLayout(this);
-        auto *left = new QVBoxLayout();
-        left->addLayout(topLayout);
-        left->addLayout(dfaLayout);
-        mainLayout->addLayout(left, 3);
-        mainLayout->addLayout(rightLayout, 1);
-
-        // build NFA & DFA once
-        nfa = buildCombinedNFA();
-        dfaStates = subsetConstruct(nfa);
-        automataView->buildFromDFA(dfaStates);
-
+        nfa=buildCombinedNFA(); 
+        dfa=subsetConstruct(nfa); 
+        view->buildFromDFA(dfa); 
         fillGrammar();
 
-        // connect
-        connect(lexButton, &QPushButton::clicked, this, &MainWindow::onLex);
-        connect(parseButton, &QPushButton::clicked, this, &MainWindow::onParse);
-        connect(stepDfaButton, &QPushButton::clicked, this, &MainWindow::onStepDfa);
-        connect(resetDfaButton, &QPushButton::clicked, this, &MainWindow::onResetDfa);
-        connect(stepParseButton, &QPushButton::clicked, this, &MainWindow::onStepParse);
-        connect(resetParseButton, &QPushButton::clicked, this, &MainWindow::onResetParse);
+        connect(lexBtn,&QPushButton::clicked,this,&MainWindow::onLex);
+        connect(parseBtn,&QPushButton::clicked,this,&MainWindow::onParse);
+        connect(animBtn,&QPushButton::clicked,this,&MainWindow::onAnimateDFA);
+        connect(stopBtn,&QPushButton::clicked,this,&MainWindow::onStopDFA);
+        connect(resetBtn,&QPushButton::clicked,this,&MainWindow::onResetDFA);
+        connect(clearBtn,&QPushButton::clicked,this,&MainWindow::onClearOutput);
+        connect(stepParseBtn,&QPushButton::clicked,this,&MainWindow::onStepParse);
+        connect(resetParseBtn,&QPushButton::clicked,this,&MainWindow::onResetParse);
 
-        resetDfa();
+        timer=new QTimer(this); 
+        connect(timer,&QTimer::timeout,this,&MainWindow::dfaStepTimer);
+        resetDFA(); 
         resetParse();
     }
 
 private slots:
     void onLex(){
-        tokenList->clear();
-        traceBox->clear();
-        curInput = inputEdit->text().toStdString();
-        tokens = tokenize(dfaStates, curInput);
-        if (tokens.empty()){
-            traceBox->append("Lexical error.\n");
-            return;
+        tokensBox->clear(); trace->clear(); cur=input->text().toStdString();
+        tokens=tokenize(dfa,cur);
+        if(tokens.empty()){ trace->append("❌ Lexical error."); return; }
+        for(size_t i=0;i<tokens.size();i++){
+            if(tokens[i].id==0) tokensBox->addItem(QString("%1: EOF").arg(i));
+            else tokensBox->addItem(QString("%1: %2 '%3'").arg(i).arg(QString::fromStdString(tokenNames[tokens[i].id])).arg(QString::fromStdString(tokens[i].lexeme)));
         }
-        for(size_t i=0;i<tokens.size();++i){
-            auto &t = tokens[i];
-            if (t.id==0) tokenList->addItem(QString("%1: EOF").arg((int)i));
-            else tokenList->addItem(QString("%1: %2  '%3'").arg((int)i).arg(QString::fromStdString(tokenNames[t.id])).arg(QString::fromStdString(t.lexeme)));
-        }
-        traceBox->append("Lexing completed. Tokens listed.\n");
-        // prepare DFA stepping
-        resetDfa();
+        trace->append("✅ Lexing complete.");
+        updateInputDisplay();
+        resetDFA();
     }
+
     void onParse(){
-        traceBox->clear();
-        if (tokens.empty()){ traceBox->append("No tokens: lex first.\n"); return; }
-        // do full parse and show full trace in traceBox and stackList final state
-        bool ok = parseAll(tokens);
-        traceBox->append(ok ? "Parse result: ACCEPTED\n" : "Parse result: REJECTED\n");
+        trace->clear(); 
+        if(tokens.empty()){ trace->append("⚠ Please lex first."); return; }
+        bool ok=parseAll(tokens); 
+        trace->append(ok ? "✅ Parse Accepted" : "❌ Parse Rejected");
     }
 
-    void onStepDfa(){
-        // advance one character in DFA visualization
-        if (dfaPos > (int)curInput.size()) return;
-        if (dfaPos == (int)curInput.size()){
-            traceBox->append("DFA at end (EOF)\n");
-            automataView->highlightState(-1);
-            return;
+    void onAnimateDFA(){ 
+        if(tokens.empty()){ trace->append("⚠ Please lex first."); return; }
+        
+        // Build token-by-token animation sequence
+        animationSteps.clear();
+        currentTokenIndex = 0;
+        
+        for(const auto& token : tokens) {
+            if(token.id == 0) break; // Skip EOF
+            
+            string lexeme = token.lexeme;
+            int state = 0;
+            
+            // Add steps for this token
+            for(size_t i = 0; i < lexeme.size(); i++) {
+                char c = lexeme[i];
+                auto it = dfa[state].trans.find(c);
+                if(it == dfa[state].trans.end()) break;
+                
+                int nextState = it->second;
+                animationSteps.push_back({
+                    state, nextState, c, token.pos + (int)i, 
+                    QString::fromStdString(tokenNames[token.id])
+                });
+                state = nextState;
+            }
+            
+            // Add reset step (back to q0 for next token)
+            if(&token != &tokens.back() - 1) { // Not the last token
+                animationSteps.push_back({state, 0, '\0', -1, "RESET"});
+            }
         }
-        // feed next char
-        char c = curInput[dfaPos];
-        auto it = dfaStates[dfaActiveState].trans.find(c);
-        if (it == dfaStates[dfaActiveState].trans.end()){
-            traceBox->append(QString("DFA stuck at input pos %1 char '%2'").arg(dfaPos).arg(QChar(c)));
-            return;
+        
+        animationStep = 0;
+        trace->append("▶ Starting token-by-token DFA animation...");
+        trace->append(QString("Total steps: %1").arg(animationSteps.size()));
+        timer->start(600); 
+    }
+    
+    void onStopDFA(){ 
+        timer->stop(); 
+        trace->append("⏸ Animation stopped."); 
+    }
+    
+    void onResetDFA(){ 
+        timer->stop(); 
+        resetDFA(); 
+        trace->append("🔄 DFA reset."); 
+        updateInputDisplay();
+    }
+    
+    void dfaStepTimer(){
+        if(animationStep >= (int)animationSteps.size()){ 
+            trace->append("✅ Token recognition complete!"); 
+            timer->stop(); 
+            return; 
         }
-        dfaActiveState = it->second;
-        dfaPos++;
-        automataView->highlightState(dfaActiveState);
-        traceBox->append(QString("DFA consumed '%1', moved to state %2").arg(QChar(c)).arg(dfaActiveState));
+
+        auto& step = animationSteps[animationStep];
+        
+        if(step.ch == '\0') {
+            // Reset step
+            view->highlightState(0);
+            trace->append("🔄 DFA Reset → q0 (ready for next token)");
+            dfaState = 0;
+            dfaPos = 0;
+        } else {
+            // Normal transition
+            dfaState = step.toState;
+            dfaPos = step.inputPos;
+            view->highlightState(dfaState);
+            updateInputDisplay();
+
+            QString charDisplay = (step.ch == ' ') ? "␣" : (step.ch == '\t') ? "⇥" : QString(QChar(step.ch));
+            
+            // Check if we're at an accept state
+            QString stateInfo = QString("q%1").arg(dfaState);
+            if(dfa[dfaState].accept && !dfa[dfaState].tokens.empty()) {
+                stateInfo += " ✓";
+            }
+            
+            trace->append(QString("q%1 --[%2]--> %3 | Token: %4")
+                .arg(step.fromState)
+                .arg(charDisplay)
+                .arg(stateInfo)
+                .arg(step.tokenName));
+        }
+        
+        animationStep++;
     }
 
-    void onResetDfa(){
-        resetDfa();
-        traceBox->append("DFA reset.\n");
+    void onStepParse(){ 
+        if(tokens.empty()){ trace->append("⚠ Please lex first."); return; } 
+        if(done) return; 
+        if(stepParse()) trace->append("✅ Parse accepted."); 
     }
-
-    void onStepParse(){
-        // step one parser action
-        if (tokens.empty()){ traceBox->append("No token stream. Please Lex first.\n"); return; }
-        if (parseDone) { traceBox->append("Parse already finished.\n"); return; }
-        // execute one parser step
-        if (parseStep()) {
-            traceBox->append("Parse finished: ACCEPT\n");
-            parseDone = true;
-        }
+    
+    void onResetParse(){ 
+        resetParse(); 
+        trace->append("🔄 Parser reset."); 
     }
-    void onResetParse(){
-        resetParse();
-        traceBox->append("Parser reset.\n");
+    
+    void onClearOutput(){ 
+        trace->clear(); 
+        tokensBox->clear(); 
+        stackBox->clear(); 
     }
 
 private:
-    // UI
-    QLineEdit *inputEdit;
-    QPushButton *lexButton, *parseButton, *stepDfaButton, *resetDfaButton, *stepParseButton, *resetParseButton;
-    QListWidget *tokenList;
-    QTextEdit *traceBox;
-    QListWidget *stackList;
-    AutomataView *automataView;
+    QLineEdit* input; 
+    QListWidget* tokensBox; 
+    QListWidget* stackBox; 
+    QTextEdit* trace; 
+    AutomataView* view; 
+    QTimer* timer;
+    QLabel* inputDisplay;
+    
+    FullNFA nfa; 
+    vector<DFAState> dfa; 
+    vector<Token> tokens; 
+    string cur;
+    int dfaState=0, dfaPos=0; 
+    bool done=false; 
+    vector<string> stack; 
+    int ip=0;
+    
+    // Animation structures
+    struct AnimationStep {
+        int fromState;
+        int toState;
+        char ch;
+        int inputPos;
+        QString tokenName;
+    };
+    vector<AnimationStep> animationSteps;
+    int animationStep = 0;
+    int currentTokenIndex = 0;
 
-    // backend objects
-    FullNFA nfa;
-    vector<DFAState> dfaStates;
-    vector<Token> tokens;
-    string curInput;
-
-    // DFA stepping state
-    int dfaActiveState = 0;
-    int dfaPos = 0;
-
-    // Parser stepping
-    vector<string> stackSym;
-    int ip = 0;
-    bool parseDone = false;
-
-    void resetDfa(){
-        dfaActiveState = 0;
-        dfaPos = 0;
-        automataView->highlightState(dfaActiveState);
+    void resetDFA(){ 
+        dfaState=0; 
+        dfaPos=0; 
+        view->highlightState(dfaState); 
     }
-
-    void resetParse(){
-        stackSym.clear();
-        stackSym.push_back("$");
-        stackSym.push_back(startSymbol);
-        ip = 0;
-        parseDone = false;
-        updateStackView();
+    
+    void resetParse(){ 
+        stack={"$","E"}; 
+        ip=0; 
+        done=false; 
+        updateStack(); 
     }
-
-    void updateStackView(){
-        stackList->clear();
-        for(auto &s : stackSym) stackList->addItem(QString::fromStdString(s));
+    
+    void updateStack(){ 
+        stackBox->clear(); 
+        for(int i=stack.size()-1;i>=0;i--) 
+            stackBox->addItem(QString::fromStdString(stack[i])); 
     }
-
-    bool parseAll(const vector<Token> &tokStream){
-        // full parse, produce trace in traceBox
-        vector<string> stk; stk.push_back("$"); stk.push_back(startSymbol);
-        int p = 0;
-        int step = 0;
-        while(!stk.empty()){
-            step++;
-            string top = stk.back();
-            string look = tokenToTerm(tokStream[p].id);
-            traceBox->append(QString("Step %1: Stack top='%2', lookahead='%3'").arg(step).arg(QString::fromStdString(top)).arg(QString::fromStdString(look)));
-            if (isTerminalSym(top)){
-                if (top == look){
-                    traceBox->append("  Match terminal: pop & consume");
-                    stk.pop_back(); p++;
-                } else {
-                    traceBox->append(QString("  Parse error: expected '%1' but got '%2'").arg(QString::fromStdString(top), QString::fromStdString(look)));
-                    return false;
-                }
+    
+    void updateInputDisplay() {
+        if(cur.empty()) {
+            inputDisplay->setText("");
+            return;
+        }
+        
+        QString html = "<html><body style='font-family: monospace; font-size: 12pt;'>";
+        html += "<b>Input:</b> ";
+        
+        for(int i = 0; i < (int)cur.size(); i++) {
+            char c = cur[i];
+            QString charStr = (c == ' ') ? "␣" : (c == '\t') ? "⇥" : QString(QChar(c));
+            
+            if(i < dfaPos) {
+                // Already consumed - gray
+                html += QString("<span style='color: #888;'>%1</span>").arg(charStr);
+            } else if(i == dfaPos && animationStep < (int)animationSteps.size()) {
+                // Current character - highlighted
+                html += QString("<span style='background-color: yellow; font-weight: bold; padding: 2px;'>%1</span>").arg(charStr);
             } else {
-                auto key = make_pair(top, look);
-                if (parseTable.find(key) == parseTable.end()){
-                    traceBox->append(QString("  Parse error: no rule for nonterminal '%1' with lookahead '%2'").arg(QString::fromStdString(top), QString::fromStdString(look)));
-                    return false;
-                }
-                int pi = parseTable[key];
-                auto &prod = prods[pi];
-                string rhs;
-                for(auto &r : prod.rhs) rhs += r + " ";
-                traceBox->append(QString("  Apply: %1 -> %2").arg(QString::fromStdString(prod.lhs), QString::fromStdString(rhs)));
-                stk.pop_back();
-                if (!(prod.rhs.size()==1 && prod.rhs[0]=="ε")){
-                    for(auto it = prod.rhs.rbegin(); it!=prod.rhs.rend(); ++it) stk.push_back(*it);
-                }
+                // Not yet consumed - black
+                html += charStr;
             }
         }
-        if (tokenToTerm(tokStream[p].id) == "$") return true;
-        return false;
+        
+        html += QString(" | <b>State:</b> q%1").arg(dfaState);
+        
+        // Show current token being recognized
+        if(animationStep < (int)animationSteps.size() && animationSteps[animationStep].ch != '\0') {
+            html += QString(" | <b>Recognizing:</b> %1").arg(animationSteps[animationStep].tokenName);
+        }
+        
+        html += "</body></html>";
+        
+        inputDisplay->setText(html);
     }
-
-    // parser single-step (returns true if finished & accepted)
-    bool parseStep(){
-        if (stackSym.empty()) return true;
-        string top = stackSym.back();
-        string look = tokenToTerm(tokens[ip].id);
-        if (isTerminalSym(top)){
-            if (top == look){
-                traceBox->append(QString("Match terminal '%1'").arg(QString::fromStdString(top)));
-                stackSym.pop_back(); ip++;
-                updateStackView();
-                if (stackSym.empty() && tokenToTerm(tokens[ip].id)=="$") {
-                    traceBox->append("Parse accepted.");
-                    return true;
-                }
-                return false;
-            } else {
-                traceBox->append(QString("Parse error: expected '%1' but got '%2'").arg(QString::fromStdString(top), QString::fromStdString(look)));
-                parseDone = true;
-                return true;
+    
+    bool parseAll(const vector<Token>&t){ 
+        resetParse(); 
+        while(!done){ 
+            if(!stepParse()) return false; 
+        } 
+        return true; 
+    }
+    
+    bool stepParse(){
+        if(done) return true;
+        if(stack.empty()){ done=true; return true; }
+        
+        string top=stack.back(); 
+        int id=tokens[ip].id; 
+        string term=tokenToTerm(id);
+        
+        if(top=="$" && term=="$"){ 
+            done=true; 
+            trace->append("✅ ACCEPT"); 
+            return true; 
+        }
+        
+        if(isTerminal(top)){
+            if(top==term){ 
+                stack.pop_back(); 
+                ip++; 
+                updateStack(); 
+                return true; 
             }
-        } else {
-            auto key = make_pair(top, look);
-            if (parseTable.find(key) == parseTable.end()){
-                traceBox->append(QString("Parse error: no rule for '%1' with lookahead '%2'").arg(QString::fromStdString(top), QString::fromStdString(look)));
-                parseDone = true;
-                return true;
-            }
-            int pi = parseTable[key];
-            auto &prod = prods[pi];
-            QString rhs;
-            for(auto &r: prod.rhs) rhs += QString::fromStdString(r) + " ";
-            traceBox->append(QString("Apply %1 -> %2").arg(QString::fromStdString(prod.lhs), rhs));
-            stackSym.pop_back();
-            if (!(prod.rhs.size()==1 && prod.rhs[0]=="ε")){
-                for(auto it = prod.rhs.rbegin(); it!=prod.rhs.rend(); ++it) stackSym.push_back(*it);
-            }
-            updateStackView();
+            trace->append(QString("❌ Syntax error: expected %1, got %2")
+                .arg(QString::fromStdString(top))
+                .arg(QString::fromStdString(term)));
+            done=true; 
             return false;
         }
+        
+        auto it=table.find({top,term}); 
+        if(it==table.end()){ 
+            trace->append(QString("❌ No parse rule for (%1, %2)")
+                .arg(QString::fromStdString(top))
+                .arg(QString::fromStdString(term))); 
+            done=true; 
+            return false; 
+        }
+        
+        int pid=it->second; 
+        stack.pop_back(); 
+        auto &rhs=prods[pid].rhs; 
+        
+        if(!(rhs.size()==1 && rhs[0]=="ε")) {
+            for(int i=rhs.size()-1;i>=0;i--) 
+                stack.push_back(rhs[i]);
+        }
+        
+        QString production = QString::fromStdString(top) + " → ";
+        for(size_t i = 0; i < rhs.size(); i++) {
+            if(i > 0) production += " ";
+            production += QString::fromStdString(rhs[i]);
+        }
+        trace->append(production);
+        
+        updateStack(); 
+        return true;
     }
 };
 
-int main(int argc, char **argv){
-    QApplication app(argc, argv);
-    MainWindow w;
-    w.resize(1000,600);
+// ---------------------------
+// main()
+int main(int argc,char**argv){
+    QApplication app(argc,argv);
+    MainWindow w; 
+    w.resize(1400,800); 
     w.show();
     return app.exec();
 }

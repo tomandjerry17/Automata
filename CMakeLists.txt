@@ -15,9 +15,9 @@ qt_add_executable(Automata
 
 target_link_libraries(Automata
     PRIVATE
-        Qt::Core
-        Qt::Gui
-        Qt::Widgets
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Widgets
 )
 
 include(GNUInstallDirs)

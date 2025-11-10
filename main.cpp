@@ -489,8 +489,10 @@ public:
         auto *resetBtn=new QPushButton("Reset DFA"),*clearBtn=new QPushButton("Clear Output");
         auto *stepParseBtn=new QPushButton("Step Parse"),*resetParseBtn=new QPushButton("Reset Parse");
         
-        tokensBox=new QListWidget(); 
+        tokensBox=new QListWidget();
+        tokensBox->setMaximumHeight(180); 
         stackBox=new QListWidget(); 
+        stackBox->setMaximumHeight(140); 
         trace=new QTextEdit(); 
         trace->setReadOnly(true);
         
@@ -527,7 +529,6 @@ public:
         right->addWidget(tokenTitle); 
         right->addWidget(tokensBox);
 
-        // ADD THIS ENTIRE BLOCK:
         QLabel* grammarTitle = new QLabel("<b>Regular Grammars (Token Definitions):</b>");
         grammarTitle->setTextFormat(Qt::RichText);
         right->addWidget(grammarTitle);
@@ -569,7 +570,7 @@ public:
         pdaView = new QGraphicsView();
         pdaView->setScene(new QGraphicsScene(pdaView));
         pdaView->setRenderHint(QPainter::Antialiasing);
-        pdaView->setMaximumHeight(180);
+        pdaView->setMaximumHeight(220);
         pdaView->setStyleSheet("QGraphicsView { background-color: #FFF8DC; border: 2px solid #8B4513; }");
         right->addWidget(pdaView);
 
@@ -752,7 +753,7 @@ private slots:
         double radius = 30;
         
         // Draw q0 (Reading state)
-        QGraphicsEllipseItem* q0 = scene->addEllipse(readX - radius, y - radius, 2*radius, 2*radius, 
+        pdaQ0Circle = scene->addEllipse(readX - radius, y - radius, 2*radius, 2*radius, 
             QPen(Qt::black, 2), QBrush(QColor(173, 216, 230))); // Light blue
         QGraphicsTextItem* q0Text = scene->addText("q0\n(Reading)");
         QFont font = q0Text->font();
@@ -763,7 +764,7 @@ private slots:
         q0Text->setPos(readX - q0Bounds.width()/2, y - q0Bounds.height()/2);
         
         // Draw q1 (Accept state) - double circle
-        QGraphicsEllipseItem* q1Outer = scene->addEllipse(acceptX - radius, y - radius, 2*radius, 2*radius, 
+        pdaQ1Circle = scene->addEllipse(acceptX - radius, y - radius, 2*radius, 2*radius, 
             QPen(Qt::black, 2), QBrush(QColor(144, 238, 144))); // Light green
         scene->addEllipse(acceptX - radius + 4, y - radius + 4, 2*radius - 8, 2*radius - 8, QPen(Qt::black, 2));
         QGraphicsTextItem* q1Text = scene->addText("q1\n(Accept)");
@@ -841,6 +842,10 @@ private:
     bool done=false; 
     vector<string> stack; 
     int ip=0;
+
+    int pdaState = 0;  // 0 = reading, 1 = accept
+    QGraphicsEllipseItem* pdaQ0Circle = nullptr;
+    QGraphicsEllipseItem* pdaQ1Circle = nullptr;
     
     // Animation structures
     struct AnimationStep {
@@ -860,11 +865,31 @@ private:
         view->highlightState(dfaState); 
     }
     
+    void updatePDAState() {
+        if(!pdaQ0Circle || !pdaQ1Circle) return;
+        
+        if(pdaState == 0) {
+            // q0 is active (reading)
+            pdaQ0Circle->setBrush(QBrush(QColor(255, 255, 100))); // Yellow highlight
+            pdaQ0Circle->setPen(QPen(Qt::red, 3));
+            pdaQ1Circle->setBrush(QBrush(QColor(144, 238, 144))); // Normal green
+            pdaQ1Circle->setPen(QPen(Qt::black, 2));
+        } else {
+            // q1 is active (accept)
+            pdaQ0Circle->setBrush(QBrush(QColor(173, 216, 230))); // Normal blue
+            pdaQ0Circle->setPen(QPen(Qt::black, 2));
+            pdaQ1Circle->setBrush(QBrush(QColor(255, 215, 0))); // Gold highlight
+            pdaQ1Circle->setPen(QPen(Qt::red, 3));
+        }
+    }
+    
     void resetParse(){ 
         stack={"$","E"}; 
         ip=0; 
         done=false; 
-        updateStack(); 
+        pdaState = 0;  // ADD THIS LINE
+        updateStack();
+        updatePDAState();  // ADD THIS LINE
     }
     
     void updateStack(){ 
@@ -927,16 +952,22 @@ private:
         string term=tokenToTerm(id);
         
         if(top=="$" && term=="$"){ 
-            done=true; 
-            trace->append("✅ ACCEPT"); 
+            done=true;
+            pdaState = 1;
+            updatePDAState();
+            trace->append("✅ ACCEPT - PDA transitions to q1 (Accept State)"); 
             return true; 
         }
         
         if(isTerminal(top)){
-            if(top==term){ 
+            if(top==term){
+                trace->append(QString("PDA: Pop '%1' from stack, consume '%2'")
+                    .arg(QString::fromStdString(top))
+                    .arg(QString::fromStdString(term)));
                 stack.pop_back(); 
                 ip++; 
-                updateStack(); 
+                updateStack();
+                updatePDAState();  // ADD THIS LINE
                 return true; 
             }
             trace->append(QString("❌ Syntax error: expected %1, got %2")
@@ -959,19 +990,32 @@ private:
         stack.pop_back(); 
         auto &rhs=prods[pid].rhs; 
         
-        if(!(rhs.size()==1 && rhs[0]=="ε")) {
-            for(int i=rhs.size()-1;i>=0;i--) 
-                stack.push_back(rhs[i]);
-        }
-        
         QString production = QString::fromStdString(top) + " → ";
         for(size_t i = 0; i < rhs.size(); i++) {
             if(i > 0) production += " ";
             production += QString::fromStdString(rhs[i]);
         }
-        trace->append(production);
         
-        updateStack(); 
+        QString stackOp = QString("PDA: Pop '%1', Push ").arg(QString::fromStdString(top));
+        if(rhs.size()==1 && rhs[0]=="ε") {
+            stackOp += "ε (nothing)";
+        } else {
+            stackOp += "'";
+            for(int i=rhs.size()-1; i>=0; i--) {
+                stackOp += QString::fromStdString(rhs[i]);
+                if(i > 0) stackOp += " ";
+            }
+            stackOp += "'";
+        }
+        trace->append(production + " | " + stackOp);
+        
+        if(!(rhs.size()==1 && rhs[0]=="ε")) {
+            for(int i=rhs.size()-1;i>=0;i--) 
+                stack.push_back(rhs[i]);
+        }
+        
+        updateStack();
+        updatePDAState();
         return true;
     }
 };
@@ -980,9 +1024,24 @@ private:
 // main()
 int main(int argc,char**argv){
     QApplication app(argc,argv);
-    MainWindow w; 
-    w.resize(1400,800); 
-    w.show();
+    
+    // FORCE LIGHT THEME - ADD THIS BLOCK:
+    app.setStyle("Fusion");  // Use Fusion style (cross-platform)
+    QPalette lightPalette;
+    lightPalette.setColor(QPalette::Window, QColor(240, 240, 240));
+    lightPalette.setColor(QPalette::WindowText, Qt::black);
+    lightPalette.setColor(QPalette::Base, QColor(255, 255, 255));
+    lightPalette.setColor(QPalette::AlternateBase, QColor(245, 245, 245));
+    lightPalette.setColor(QPalette::Text, Qt::black);
+    lightPalette.setColor(QPalette::Button, QColor(240, 240, 240));
+    lightPalette.setColor(QPalette::ButtonText, Qt::black);
+    lightPalette.setColor(QPalette::BrightText, Qt::red);
+    lightPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+    lightPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+    lightPalette.setColor(QPalette::HighlightedText, Qt::white);
+    app.setPalette(lightPalette);
+    
+    MainWindow w; w.resize(1600,900); w.show();
     return app.exec();
 }
 

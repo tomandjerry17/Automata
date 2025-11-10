@@ -6,6 +6,10 @@
         "set": "cpp",
         "vector": "cpp",
         "stack": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "unordered_map": "cpp",
+        "queue": "cpp",
+        "cctype": "cpp",
+        "numeric": "cpp"
     }
 }

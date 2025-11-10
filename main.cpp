@@ -506,8 +506,10 @@ public:
         top->addWidget(parseBtn); 
         top->addWidget(clearBtn);
 
-        auto *dfaL=new QVBoxLayout(); 
-        dfaL->addWidget(new QLabel("DFA Visualization:"));
+        auto *dfaL=new QVBoxLayout();
+        QLabel* dfaTitle = new QLabel("<b style='font-size:14pt; color:#2C5F2D;'>DFA Visualization (Regular Language - Lexical Analysis)</b>");
+        dfaTitle->setTextFormat(Qt::RichText);
+        dfaL->addWidget(dfaTitle);
         dfaL->addWidget(inputDisplay);
         view=new AutomataView(); 
         view->setMinimumHeight(400);
@@ -519,11 +521,63 @@ public:
         dfaBtns->addWidget(resetBtn); 
         dfaL->addLayout(dfaBtns);
 
-        auto *right=new QVBoxLayout(); 
-        right->addWidget(new QLabel("Tokens:")); 
+        auto *right=new QVBoxLayout();
+        QLabel* tokenTitle = new QLabel("<b>Tokens (Lexical Analysis Output):</b>");
+        tokenTitle->setTextFormat(Qt::RichText);
+        right->addWidget(tokenTitle); 
         right->addWidget(tokensBox);
-        right->addWidget(new QLabel("Parser Stack:")); 
+
+        // ADD THIS ENTIRE BLOCK:
+        QLabel* grammarTitle = new QLabel("<b>Regular Grammars (Token Definitions):</b>");
+        grammarTitle->setTextFormat(Qt::RichText);
+        right->addWidget(grammarTitle);
+
+        grammarDisplay = new QTextEdit();
+        grammarDisplay->setReadOnly(true);
+        grammarDisplay->setMaximumHeight(150);
+        grammarDisplay->setStyleSheet("QTextEdit { background-color: #F5F5DC; font-family: 'Courier New'; font-size: 9pt; }");
+        grammarDisplay->setHtml(
+            "<b>ID:</b><br>"
+            "&nbsp;&nbsp;Identifier → Letter IdentifierTail<br>"
+            "&nbsp;&nbsp;IdentifierTail → Letter IdentifierTail | Digit IdentifierTail | _ IdentifierTail | ε<br>"
+            "&nbsp;&nbsp;Letter → a|b|c|...|z|A|B|...|Z<br>"
+            "&nbsp;&nbsp;Digit → 0|1|2|...|9<br><br>"
+            
+            "<b>NUMBER:</b><br>"
+            "&nbsp;&nbsp;Number → Digits FractionalPart<br>"
+            "&nbsp;&nbsp;Digits → Digit Digits | Digit<br>"
+            "&nbsp;&nbsp;FractionalPart → . Digits | ε<br><br>"
+            
+            "<b>OPERATORS:</b><br>"
+            "&nbsp;&nbsp;Plus → +<br>"
+            "&nbsp;&nbsp;Minus → -<br>"
+            "&nbsp;&nbsp;Star → *<br>"
+            "&nbsp;&nbsp;Slash → /<br>"
+            "&nbsp;&nbsp;LParen → (<br>"
+            "&nbsp;&nbsp;RParen → )<br><br>"
+            
+            "<b>WHITESPACE:</b><br>"
+            "&nbsp;&nbsp;WS → Space WS | Tab WS | ε"
+        );
+        right->addWidget(grammarDisplay);
+
+        QLabel* pdaTitle = new QLabel("<b style='font-size:12pt; color:#8B4513;'>PDA (Context-Free Grammar - Syntactic Analysis)</b>");
+        pdaTitle->setTextFormat(Qt::RichText);
+        right->addWidget(pdaTitle);
+
+        // ADD PDA VISUALIZATION
+        pdaView = new QGraphicsView();
+        pdaView->setScene(new QGraphicsScene(pdaView));
+        pdaView->setRenderHint(QPainter::Antialiasing);
+        pdaView->setMaximumHeight(180);
+        pdaView->setStyleSheet("QGraphicsView { background-color: #FFF8DC; border: 2px solid #8B4513; }");
+        right->addWidget(pdaView);
+
+        QLabel* stackLabel = new QLabel("<b>PDA Stack:</b>");
+        stackLabel->setTextFormat(Qt::RichText);
+        right->addWidget(stackLabel);
         right->addWidget(stackBox);
+
         auto *pBtns=new QHBoxLayout(); 
         pBtns->addWidget(stepParseBtn); 
         pBtns->addWidget(resetParseBtn); 
@@ -535,7 +589,7 @@ public:
         auto *left=new QVBoxLayout(); 
         left->addLayout(top); 
         left->addLayout(dfaL); 
-        main->addLayout(left,3); 
+        main->addLayout(left,2); 
         main->addLayout(right,1);
 
         nfa=buildCombinedNFA(); 
@@ -556,6 +610,7 @@ public:
         connect(timer,&QTimer::timeout,this,&MainWindow::dfaStepTimer);
         resetDFA(); 
         resetParse();
+        drawPDA();
     }
 
 private slots:
@@ -687,12 +742,94 @@ private slots:
         stackBox->clear(); 
     }
 
+    void drawPDA() {
+        QGraphicsScene* scene = pdaView->scene();
+        scene->clear();
+        
+        // Define positions
+        double startX = 50, readX = 200, acceptX = 350;
+        double y = 90;
+        double radius = 30;
+        
+        // Draw q0 (Reading state)
+        QGraphicsEllipseItem* q0 = scene->addEllipse(readX - radius, y - radius, 2*radius, 2*radius, 
+            QPen(Qt::black, 2), QBrush(QColor(173, 216, 230))); // Light blue
+        QGraphicsTextItem* q0Text = scene->addText("q0\n(Reading)");
+        QFont font = q0Text->font();
+        font.setPointSize(8);
+        font.setBold(true);
+        q0Text->setFont(font);
+        QRectF q0Bounds = q0Text->boundingRect();
+        q0Text->setPos(readX - q0Bounds.width()/2, y - q0Bounds.height()/2);
+        
+        // Draw q1 (Accept state) - double circle
+        QGraphicsEllipseItem* q1Outer = scene->addEllipse(acceptX - radius, y - radius, 2*radius, 2*radius, 
+            QPen(Qt::black, 2), QBrush(QColor(144, 238, 144))); // Light green
+        scene->addEllipse(acceptX - radius + 4, y - radius + 4, 2*radius - 8, 2*radius - 8, QPen(Qt::black, 2));
+        QGraphicsTextItem* q1Text = scene->addText("q1\n(Accept)");
+        q1Text->setFont(font);
+        QRectF q1Bounds = q1Text->boundingRect();
+        q1Text->setPos(acceptX - q1Bounds.width()/2, y - q1Bounds.height()/2);
+        
+        // Draw START arrow to q0
+        QLineF startArrow(startX, y, readX - radius - 5, y);
+        scene->addLine(startArrow, QPen(Qt::darkBlue, 2));
+        // Arrow head
+        QPointF p1 = startArrow.p2() - QPointF(10, 5);
+        QPointF p2 = startArrow.p2() - QPointF(10, -5);
+        QPolygonF arrowHead;
+        arrowHead << startArrow.p2() << p1 << p2;
+        scene->addPolygon(arrowHead, QPen(Qt::darkBlue), QBrush(Qt::darkBlue));
+        
+        QGraphicsTextItem* startLabel = scene->addText("START");
+        QFont startFont = startLabel->font();
+        startFont.setPointSize(7);
+        startFont.setBold(true);
+        startLabel->setFont(startFont);
+        startLabel->setDefaultTextColor(Qt::darkBlue);
+        startLabel->setPos(startX - 5, y - 25);
+        
+        // Draw self-loop on q0 (for reading input)
+        QPainterPath loopPath;
+        loopPath.moveTo(readX - 10, y - radius);
+        loopPath.arcTo(readX - 35, y - radius - 50, 50, 50, -30, 240);
+        scene->addPath(loopPath, QPen(QColor(100, 100, 100), 2));
+        
+        QGraphicsTextItem* loopLabel = scene->addText("Input symbol,\nStack top →\nStack push/pop");
+        QFont loopFont = loopLabel->font();
+        loopFont.setPointSize(7);
+        loopLabel->setFont(loopFont);
+        loopLabel->setDefaultTextColor(Qt::blue);
+        loopLabel->setPos(readX - 25, y - 75);
+        
+        // Draw transition q0 -> q1
+        QLineF transLine(readX + radius, y, acceptX - radius, y);
+        scene->addLine(transLine, QPen(QColor(80, 80, 80), 2));
+        // Arrow head
+        QPointF t1 = transLine.p2() - QPointF(10, 5);
+        QPointF t2 = transLine.p2() - QPointF(10, -5);
+        QPolygonF transArrow;
+        transArrow << transLine.p2() << t1 << t2;
+        scene->addPolygon(transArrow, QPen(QColor(80, 80, 80)), QBrush(QColor(80, 80, 80)));
+        
+        QGraphicsTextItem* transLabel = scene->addText("$, $ → ε");
+        QFont transFont = transLabel->font();
+        transFont.setPointSize(7);
+        transLabel->setFont(transFont);
+        transLabel->setDefaultTextColor(Qt::blue);
+        transLabel->setPos((readX + acceptX)/2 - 20, y - 30);
+        
+        scene->setSceneRect(scene->itemsBoundingRect().adjusted(-10, -10, 10, 10));
+    }
+
 private:
-    QLineEdit* input; 
+    QLineEdit* input;
     QListWidget* tokensBox; 
     QListWidget* stackBox; 
     QTextEdit* trace; 
-    AutomataView* view; 
+    QTextEdit* grammarDisplay;
+    AutomataView* view;
+    QGraphicsView* pdaView; 
     QTimer* timer;
     QLabel* inputDisplay;
     

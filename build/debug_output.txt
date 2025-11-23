@@ -1,0 +1,83 @@
+=== DFA State 0 (Start) ===
+NFA states in closure: 0 1 7 23 25 27 29 31 33 35 37 39 41 42 
+  State 42 is accept state for token 9
+  WARNING: Start state IS an accept state (INCORRECT)
+
+=== DFA State 1 ===
+Created from char: '	' from state 0
+NFA states: 35 36 37 39 40 42 
+  State 42 is accept state for token 9
+
+=== DFA State 2 ===
+Created from char: ' ' from state 0
+NFA states: 35 37 38 39 40 42 
+  State 42 is accept state for token 9
+
+=== DFA State 3 ===
+Created from char: '(' from state 0
+NFA states: 32 
+  State 32 is accept state for token 7
+
+=== DFA State 4 ===
+Created from char: ')' from state 0
+NFA states: 34 
+  State 34 is accept state for token 8
+
+=== DFA State 5 ===
+Created from char: '*' from state 0
+NFA states: 28 
+  State 28 is accept state for token 5
+
+=== DFA State 6 ===
+Created from char: '+' from state 0
+NFA states: 24 
+  State 24 is accept state for token 3
+
+=== DFA State 7 ===
+Created from char: '-' from state 0
+NFA states: 26 
+  State 26 is accept state for token 4
+
+=== DFA State 8 ===
+Created from char: '/' from state 0
+NFA states: 30 
+  State 30 is accept state for token 6
+
+=== DFA State 9 ===
+Created from char: '0' from state 0
+NFA states: 8 9 11 12 13 21 22 
+  State 22 is accept state for token 2
+
+=== DFA State 10 ===
+Created from char: 'A' from state 0
+NFA states: 2 3 5 6 
+  State 6 is accept state for token 1
+
+=== DFA State 11 ===
+Created from char: '.' from state 9
+NFA states: 14 19 
+  This is NOT an accept state
+
+=== DFA State 12 ===
+Created from char: '0' from state 9
+NFA states: 9 10 12 13 21 22 
+  State 22 is accept state for token 2
+
+=== DFA State 13 ===
+Created from char: '0' from state 10
+NFA states: 3 4 6 
+  State 6 is accept state for token 1
+
+=== DFA State 14 ===
+Created from char: '0' from state 11
+NFA states: 15 17 18 20 22 
+  State 22 is accept state for token 2
+
+=== DFA State 15 ===
+Created from char: '0' from state 14
+NFA states: 15 16 18 22 
+  State 22 is accept state for token 2
+
+=== DFA CONSTRUCTION COMPLETE ===
+Total DFA states: 16
+Accept states: 0 1 2 3 4 5 6 7 8 9 10 12 13 14 15 

@@ -223,29 +223,293 @@ Automata_autogen/mocs_compilation.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/Automata_autogen/mocs_compilation.cpp.s
 .PHONY : Automata_autogen/mocs_compilation.cpp.s
 
-main.obj: main.cpp.obj
-.PHONY : main.obj
+src/core/dfa.obj: src/core/dfa.cpp.obj
+.PHONY : src/core/dfa.obj
 
 # target to build an object file
-main.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/main.cpp.obj
-.PHONY : main.cpp.obj
+src/core/dfa.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/core/dfa.cpp.obj
+.PHONY : src/core/dfa.cpp.obj
 
-main.i: main.cpp.i
-.PHONY : main.i
+src/core/dfa.i: src/core/dfa.cpp.i
+.PHONY : src/core/dfa.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/main.cpp.i
-.PHONY : main.cpp.i
+src/core/dfa.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/core/dfa.cpp.i
+.PHONY : src/core/dfa.cpp.i
 
-main.s: main.cpp.s
-.PHONY : main.s
+src/core/dfa.s: src/core/dfa.cpp.s
+.PHONY : src/core/dfa.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/main.cpp.s
-.PHONY : main.cpp.s
+src/core/dfa.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/core/dfa.cpp.s
+.PHONY : src/core/dfa.cpp.s
+
+src/core/nfa.obj: src/core/nfa.cpp.obj
+.PHONY : src/core/nfa.obj
+
+# target to build an object file
+src/core/nfa.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/core/nfa.cpp.obj
+.PHONY : src/core/nfa.cpp.obj
+
+src/core/nfa.i: src/core/nfa.cpp.i
+.PHONY : src/core/nfa.i
+
+# target to preprocess a source file
+src/core/nfa.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/core/nfa.cpp.i
+.PHONY : src/core/nfa.cpp.i
+
+src/core/nfa.s: src/core/nfa.cpp.s
+.PHONY : src/core/nfa.s
+
+# target to generate assembly for a file
+src/core/nfa.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/core/nfa.cpp.s
+.PHONY : src/core/nfa.cpp.s
+
+src/core/subset.obj: src/core/subset.cpp.obj
+.PHONY : src/core/subset.obj
+
+# target to build an object file
+src/core/subset.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/core/subset.cpp.obj
+.PHONY : src/core/subset.cpp.obj
+
+src/core/subset.i: src/core/subset.cpp.i
+.PHONY : src/core/subset.i
+
+# target to preprocess a source file
+src/core/subset.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/core/subset.cpp.i
+.PHONY : src/core/subset.cpp.i
+
+src/core/subset.s: src/core/subset.cpp.s
+.PHONY : src/core/subset.s
+
+# target to generate assembly for a file
+src/core/subset.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/core/subset.cpp.s
+.PHONY : src/core/subset.cpp.s
+
+src/core/thompson.obj: src/core/thompson.cpp.obj
+.PHONY : src/core/thompson.obj
+
+# target to build an object file
+src/core/thompson.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/core/thompson.cpp.obj
+.PHONY : src/core/thompson.cpp.obj
+
+src/core/thompson.i: src/core/thompson.cpp.i
+.PHONY : src/core/thompson.i
+
+# target to preprocess a source file
+src/core/thompson.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/core/thompson.cpp.i
+.PHONY : src/core/thompson.cpp.i
+
+src/core/thompson.s: src/core/thompson.cpp.s
+.PHONY : src/core/thompson.s
+
+# target to generate assembly for a file
+src/core/thompson.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/core/thompson.cpp.s
+.PHONY : src/core/thompson.cpp.s
+
+src/core/tokens.obj: src/core/tokens.cpp.obj
+.PHONY : src/core/tokens.obj
+
+# target to build an object file
+src/core/tokens.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/core/tokens.cpp.obj
+.PHONY : src/core/tokens.cpp.obj
+
+src/core/tokens.i: src/core/tokens.cpp.i
+.PHONY : src/core/tokens.i
+
+# target to preprocess a source file
+src/core/tokens.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/core/tokens.cpp.i
+.PHONY : src/core/tokens.cpp.i
+
+src/core/tokens.s: src/core/tokens.cpp.s
+.PHONY : src/core/tokens.s
+
+# target to generate assembly for a file
+src/core/tokens.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/core/tokens.cpp.s
+.PHONY : src/core/tokens.cpp.s
+
+src/gui/automataview.obj: src/gui/automataview.cpp.obj
+.PHONY : src/gui/automataview.obj
+
+# target to build an object file
+src/gui/automataview.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/gui/automataview.cpp.obj
+.PHONY : src/gui/automataview.cpp.obj
+
+src/gui/automataview.i: src/gui/automataview.cpp.i
+.PHONY : src/gui/automataview.i
+
+# target to preprocess a source file
+src/gui/automataview.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/gui/automataview.cpp.i
+.PHONY : src/gui/automataview.cpp.i
+
+src/gui/automataview.s: src/gui/automataview.cpp.s
+.PHONY : src/gui/automataview.s
+
+# target to generate assembly for a file
+src/gui/automataview.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/gui/automataview.cpp.s
+.PHONY : src/gui/automataview.cpp.s
+
+src/gui/mainwindow.obj: src/gui/mainwindow.cpp.obj
+.PHONY : src/gui/mainwindow.obj
+
+# target to build an object file
+src/gui/mainwindow.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.obj
+.PHONY : src/gui/mainwindow.cpp.obj
+
+src/gui/mainwindow.i: src/gui/mainwindow.cpp.i
+.PHONY : src/gui/mainwindow.i
+
+# target to preprocess a source file
+src/gui/mainwindow.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.i
+.PHONY : src/gui/mainwindow.cpp.i
+
+src/gui/mainwindow.s: src/gui/mainwindow.cpp.s
+.PHONY : src/gui/mainwindow.s
+
+# target to generate assembly for a file
+src/gui/mainwindow.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.s
+.PHONY : src/gui/mainwindow.cpp.s
+
+src/gui/nfaview.obj: src/gui/nfaview.cpp.obj
+.PHONY : src/gui/nfaview.obj
+
+# target to build an object file
+src/gui/nfaview.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/gui/nfaview.cpp.obj
+.PHONY : src/gui/nfaview.cpp.obj
+
+src/gui/nfaview.i: src/gui/nfaview.cpp.i
+.PHONY : src/gui/nfaview.i
+
+# target to preprocess a source file
+src/gui/nfaview.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/gui/nfaview.cpp.i
+.PHONY : src/gui/nfaview.cpp.i
+
+src/gui/nfaview.s: src/gui/nfaview.cpp.s
+.PHONY : src/gui/nfaview.s
+
+# target to generate assembly for a file
+src/gui/nfaview.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/gui/nfaview.cpp.s
+.PHONY : src/gui/nfaview.cpp.s
+
+src/lexer/tokenizer.obj: src/lexer/tokenizer.cpp.obj
+.PHONY : src/lexer/tokenizer.obj
+
+# target to build an object file
+src/lexer/tokenizer.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/lexer/tokenizer.cpp.obj
+.PHONY : src/lexer/tokenizer.cpp.obj
+
+src/lexer/tokenizer.i: src/lexer/tokenizer.cpp.i
+.PHONY : src/lexer/tokenizer.i
+
+# target to preprocess a source file
+src/lexer/tokenizer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/lexer/tokenizer.cpp.i
+.PHONY : src/lexer/tokenizer.cpp.i
+
+src/lexer/tokenizer.s: src/lexer/tokenizer.cpp.s
+.PHONY : src/lexer/tokenizer.s
+
+# target to generate assembly for a file
+src/lexer/tokenizer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/lexer/tokenizer.cpp.s
+.PHONY : src/lexer/tokenizer.cpp.s
+
+src/main.obj: src/main.cpp.obj
+.PHONY : src/main.obj
+
+# target to build an object file
+src/main.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/main.cpp.obj
+.PHONY : src/main.cpp.obj
+
+src/main.i: src/main.cpp.i
+.PHONY : src/main.i
+
+# target to preprocess a source file
+src/main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
+
+src/main.s: src/main.cpp.s
+.PHONY : src/main.s
+
+# target to generate assembly for a file
+src/main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
+
+src/parser/grammar.obj: src/parser/grammar.cpp.obj
+.PHONY : src/parser/grammar.obj
+
+# target to build an object file
+src/parser/grammar.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/parser/grammar.cpp.obj
+.PHONY : src/parser/grammar.cpp.obj
+
+src/parser/grammar.i: src/parser/grammar.cpp.i
+.PHONY : src/parser/grammar.i
+
+# target to preprocess a source file
+src/parser/grammar.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/parser/grammar.cpp.i
+.PHONY : src/parser/grammar.cpp.i
+
+src/parser/grammar.s: src/parser/grammar.cpp.s
+.PHONY : src/parser/grammar.s
+
+# target to generate assembly for a file
+src/parser/grammar.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/parser/grammar.cpp.s
+.PHONY : src/parser/grammar.cpp.s
+
+src/parser/parser.obj: src/parser/parser.cpp.obj
+.PHONY : src/parser/parser.obj
+
+# target to build an object file
+src/parser/parser.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/parser/parser.cpp.obj
+.PHONY : src/parser/parser.cpp.obj
+
+src/parser/parser.i: src/parser/parser.cpp.i
+.PHONY : src/parser/parser.i
+
+# target to preprocess a source file
+src/parser/parser.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/parser/parser.cpp.i
+.PHONY : src/parser/parser.cpp.i
+
+src/parser/parser.s: src/parser/parser.cpp.s
+.PHONY : src/parser/parser.s
+
+# target to generate assembly for a file
+src/parser/parser.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/parser/parser.cpp.s
+.PHONY : src/parser/parser.cpp.s
 
 # Help Target
 help:
@@ -265,9 +529,42 @@ help:
 	@echo ... Automata_autogen/mocs_compilation.obj
 	@echo ... Automata_autogen/mocs_compilation.i
 	@echo ... Automata_autogen/mocs_compilation.s
-	@echo ... main.obj
-	@echo ... main.i
-	@echo ... main.s
+	@echo ... src/core/dfa.obj
+	@echo ... src/core/dfa.i
+	@echo ... src/core/dfa.s
+	@echo ... src/core/nfa.obj
+	@echo ... src/core/nfa.i
+	@echo ... src/core/nfa.s
+	@echo ... src/core/subset.obj
+	@echo ... src/core/subset.i
+	@echo ... src/core/subset.s
+	@echo ... src/core/thompson.obj
+	@echo ... src/core/thompson.i
+	@echo ... src/core/thompson.s
+	@echo ... src/core/tokens.obj
+	@echo ... src/core/tokens.i
+	@echo ... src/core/tokens.s
+	@echo ... src/gui/automataview.obj
+	@echo ... src/gui/automataview.i
+	@echo ... src/gui/automataview.s
+	@echo ... src/gui/mainwindow.obj
+	@echo ... src/gui/mainwindow.i
+	@echo ... src/gui/mainwindow.s
+	@echo ... src/gui/nfaview.obj
+	@echo ... src/gui/nfaview.i
+	@echo ... src/gui/nfaview.s
+	@echo ... src/lexer/tokenizer.obj
+	@echo ... src/lexer/tokenizer.i
+	@echo ... src/lexer/tokenizer.s
+	@echo ... src/main.obj
+	@echo ... src/main.i
+	@echo ... src/main.s
+	@echo ... src/parser/grammar.obj
+	@echo ... src/parser/grammar.i
+	@echo ... src/parser/grammar.s
+	@echo ... src/parser/parser.obj
+	@echo ... src/parser/parser.i
+	@echo ... src/parser/parser.s
 .PHONY : help
 
 

@@ -12,6 +12,17 @@
         "cctype": "cpp",
         "numeric": "cpp",
         "algorithm": "cpp",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "qapplication": "cpp",
+        "qpalette": "cpp",
+        "qvboxlayout": "cpp",
+        "qpainterpath": "cpp",
+        "qtabwidget": "cpp",
+        "qgroupbox": "cpp",
+        "qheaderview": "cpp",
+        "qhboxlayout": "cpp",
+        "qscrollarea": "cpp",
+        "qtablewidgetitem": "cpp",
+        "qthread": "cpp"
     }
 }

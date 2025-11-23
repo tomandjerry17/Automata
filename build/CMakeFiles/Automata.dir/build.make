@@ -86,31 +86,218 @@ CMakeFiles/Automata.dir/Automata_autogen/mocs_compilation.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Automata.dir/Automata_autogen/mocs_compilation.cpp.s"
 	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thoma\OneDrive\Desktop\Automata\build\Automata_autogen\mocs_compilation.cpp -o CMakeFiles\Automata.dir\Automata_autogen\mocs_compilation.cpp.s
 
-CMakeFiles/Automata.dir/main.cpp.obj: CMakeFiles/Automata.dir/flags.make
-CMakeFiles/Automata.dir/main.cpp.obj: CMakeFiles/Automata.dir/includes_CXX.rsp
-CMakeFiles/Automata.dir/main.cpp.obj: C:/Users/thoma/OneDrive/Desktop/Automata/main.cpp
-CMakeFiles/Automata.dir/main.cpp.obj: CMakeFiles/Automata.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/Automata.dir/main.cpp.obj"
-	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Automata.dir/main.cpp.obj -MF CMakeFiles\Automata.dir\main.cpp.obj.d -o CMakeFiles\Automata.dir\main.cpp.obj -c C:\Users\thoma\OneDrive\Desktop\Automata\main.cpp
+CMakeFiles/Automata.dir/src/main.cpp.obj: CMakeFiles/Automata.dir/flags.make
+CMakeFiles/Automata.dir/src/main.cpp.obj: CMakeFiles/Automata.dir/includes_CXX.rsp
+CMakeFiles/Automata.dir/src/main.cpp.obj: C:/Users/thoma/OneDrive/Desktop/Automata/src/main.cpp
+CMakeFiles/Automata.dir/src/main.cpp.obj: CMakeFiles/Automata.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/Automata.dir/src/main.cpp.obj"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Automata.dir/src/main.cpp.obj -MF CMakeFiles\Automata.dir\src\main.cpp.obj.d -o CMakeFiles\Automata.dir\src\main.cpp.obj -c C:\Users\thoma\OneDrive\Desktop\Automata\src\main.cpp
 
-CMakeFiles/Automata.dir/main.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Automata.dir/main.cpp.i"
-	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\thoma\OneDrive\Desktop\Automata\main.cpp > CMakeFiles\Automata.dir\main.cpp.i
+CMakeFiles/Automata.dir/src/main.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Automata.dir/src/main.cpp.i"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\thoma\OneDrive\Desktop\Automata\src\main.cpp > CMakeFiles\Automata.dir\src\main.cpp.i
 
-CMakeFiles/Automata.dir/main.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Automata.dir/main.cpp.s"
-	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thoma\OneDrive\Desktop\Automata\main.cpp -o CMakeFiles\Automata.dir\main.cpp.s
+CMakeFiles/Automata.dir/src/main.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Automata.dir/src/main.cpp.s"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thoma\OneDrive\Desktop\Automata\src\main.cpp -o CMakeFiles\Automata.dir\src\main.cpp.s
+
+CMakeFiles/Automata.dir/src/core/nfa.cpp.obj: CMakeFiles/Automata.dir/flags.make
+CMakeFiles/Automata.dir/src/core/nfa.cpp.obj: CMakeFiles/Automata.dir/includes_CXX.rsp
+CMakeFiles/Automata.dir/src/core/nfa.cpp.obj: C:/Users/thoma/OneDrive/Desktop/Automata/src/core/nfa.cpp
+CMakeFiles/Automata.dir/src/core/nfa.cpp.obj: CMakeFiles/Automata.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/Automata.dir/src/core/nfa.cpp.obj"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Automata.dir/src/core/nfa.cpp.obj -MF CMakeFiles\Automata.dir\src\core\nfa.cpp.obj.d -o CMakeFiles\Automata.dir\src\core\nfa.cpp.obj -c C:\Users\thoma\OneDrive\Desktop\Automata\src\core\nfa.cpp
+
+CMakeFiles/Automata.dir/src/core/nfa.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Automata.dir/src/core/nfa.cpp.i"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\thoma\OneDrive\Desktop\Automata\src\core\nfa.cpp > CMakeFiles\Automata.dir\src\core\nfa.cpp.i
+
+CMakeFiles/Automata.dir/src/core/nfa.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Automata.dir/src/core/nfa.cpp.s"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thoma\OneDrive\Desktop\Automata\src\core\nfa.cpp -o CMakeFiles\Automata.dir\src\core\nfa.cpp.s
+
+CMakeFiles/Automata.dir/src/core/dfa.cpp.obj: CMakeFiles/Automata.dir/flags.make
+CMakeFiles/Automata.dir/src/core/dfa.cpp.obj: CMakeFiles/Automata.dir/includes_CXX.rsp
+CMakeFiles/Automata.dir/src/core/dfa.cpp.obj: C:/Users/thoma/OneDrive/Desktop/Automata/src/core/dfa.cpp
+CMakeFiles/Automata.dir/src/core/dfa.cpp.obj: CMakeFiles/Automata.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/Automata.dir/src/core/dfa.cpp.obj"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Automata.dir/src/core/dfa.cpp.obj -MF CMakeFiles\Automata.dir\src\core\dfa.cpp.obj.d -o CMakeFiles\Automata.dir\src\core\dfa.cpp.obj -c C:\Users\thoma\OneDrive\Desktop\Automata\src\core\dfa.cpp
+
+CMakeFiles/Automata.dir/src/core/dfa.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Automata.dir/src/core/dfa.cpp.i"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\thoma\OneDrive\Desktop\Automata\src\core\dfa.cpp > CMakeFiles\Automata.dir\src\core\dfa.cpp.i
+
+CMakeFiles/Automata.dir/src/core/dfa.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Automata.dir/src/core/dfa.cpp.s"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thoma\OneDrive\Desktop\Automata\src\core\dfa.cpp -o CMakeFiles\Automata.dir\src\core\dfa.cpp.s
+
+CMakeFiles/Automata.dir/src/core/thompson.cpp.obj: CMakeFiles/Automata.dir/flags.make
+CMakeFiles/Automata.dir/src/core/thompson.cpp.obj: CMakeFiles/Automata.dir/includes_CXX.rsp
+CMakeFiles/Automata.dir/src/core/thompson.cpp.obj: C:/Users/thoma/OneDrive/Desktop/Automata/src/core/thompson.cpp
+CMakeFiles/Automata.dir/src/core/thompson.cpp.obj: CMakeFiles/Automata.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/Automata.dir/src/core/thompson.cpp.obj"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Automata.dir/src/core/thompson.cpp.obj -MF CMakeFiles\Automata.dir\src\core\thompson.cpp.obj.d -o CMakeFiles\Automata.dir\src\core\thompson.cpp.obj -c C:\Users\thoma\OneDrive\Desktop\Automata\src\core\thompson.cpp
+
+CMakeFiles/Automata.dir/src/core/thompson.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Automata.dir/src/core/thompson.cpp.i"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\thoma\OneDrive\Desktop\Automata\src\core\thompson.cpp > CMakeFiles\Automata.dir\src\core\thompson.cpp.i
+
+CMakeFiles/Automata.dir/src/core/thompson.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Automata.dir/src/core/thompson.cpp.s"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thoma\OneDrive\Desktop\Automata\src\core\thompson.cpp -o CMakeFiles\Automata.dir\src\core\thompson.cpp.s
+
+CMakeFiles/Automata.dir/src/core/subset.cpp.obj: CMakeFiles/Automata.dir/flags.make
+CMakeFiles/Automata.dir/src/core/subset.cpp.obj: CMakeFiles/Automata.dir/includes_CXX.rsp
+CMakeFiles/Automata.dir/src/core/subset.cpp.obj: C:/Users/thoma/OneDrive/Desktop/Automata/src/core/subset.cpp
+CMakeFiles/Automata.dir/src/core/subset.cpp.obj: CMakeFiles/Automata.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/Automata.dir/src/core/subset.cpp.obj"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Automata.dir/src/core/subset.cpp.obj -MF CMakeFiles\Automata.dir\src\core\subset.cpp.obj.d -o CMakeFiles\Automata.dir\src\core\subset.cpp.obj -c C:\Users\thoma\OneDrive\Desktop\Automata\src\core\subset.cpp
+
+CMakeFiles/Automata.dir/src/core/subset.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Automata.dir/src/core/subset.cpp.i"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\thoma\OneDrive\Desktop\Automata\src\core\subset.cpp > CMakeFiles\Automata.dir\src\core\subset.cpp.i
+
+CMakeFiles/Automata.dir/src/core/subset.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Automata.dir/src/core/subset.cpp.s"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thoma\OneDrive\Desktop\Automata\src\core\subset.cpp -o CMakeFiles\Automata.dir\src\core\subset.cpp.s
+
+CMakeFiles/Automata.dir/src/core/tokens.cpp.obj: CMakeFiles/Automata.dir/flags.make
+CMakeFiles/Automata.dir/src/core/tokens.cpp.obj: CMakeFiles/Automata.dir/includes_CXX.rsp
+CMakeFiles/Automata.dir/src/core/tokens.cpp.obj: C:/Users/thoma/OneDrive/Desktop/Automata/src/core/tokens.cpp
+CMakeFiles/Automata.dir/src/core/tokens.cpp.obj: CMakeFiles/Automata.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/Automata.dir/src/core/tokens.cpp.obj"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Automata.dir/src/core/tokens.cpp.obj -MF CMakeFiles\Automata.dir\src\core\tokens.cpp.obj.d -o CMakeFiles\Automata.dir\src\core\tokens.cpp.obj -c C:\Users\thoma\OneDrive\Desktop\Automata\src\core\tokens.cpp
+
+CMakeFiles/Automata.dir/src/core/tokens.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Automata.dir/src/core/tokens.cpp.i"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\thoma\OneDrive\Desktop\Automata\src\core\tokens.cpp > CMakeFiles\Automata.dir\src\core\tokens.cpp.i
+
+CMakeFiles/Automata.dir/src/core/tokens.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Automata.dir/src/core/tokens.cpp.s"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thoma\OneDrive\Desktop\Automata\src\core\tokens.cpp -o CMakeFiles\Automata.dir\src\core\tokens.cpp.s
+
+CMakeFiles/Automata.dir/src/lexer/tokenizer.cpp.obj: CMakeFiles/Automata.dir/flags.make
+CMakeFiles/Automata.dir/src/lexer/tokenizer.cpp.obj: CMakeFiles/Automata.dir/includes_CXX.rsp
+CMakeFiles/Automata.dir/src/lexer/tokenizer.cpp.obj: C:/Users/thoma/OneDrive/Desktop/Automata/src/lexer/tokenizer.cpp
+CMakeFiles/Automata.dir/src/lexer/tokenizer.cpp.obj: CMakeFiles/Automata.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/Automata.dir/src/lexer/tokenizer.cpp.obj"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Automata.dir/src/lexer/tokenizer.cpp.obj -MF CMakeFiles\Automata.dir\src\lexer\tokenizer.cpp.obj.d -o CMakeFiles\Automata.dir\src\lexer\tokenizer.cpp.obj -c C:\Users\thoma\OneDrive\Desktop\Automata\src\lexer\tokenizer.cpp
+
+CMakeFiles/Automata.dir/src/lexer/tokenizer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Automata.dir/src/lexer/tokenizer.cpp.i"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\thoma\OneDrive\Desktop\Automata\src\lexer\tokenizer.cpp > CMakeFiles\Automata.dir\src\lexer\tokenizer.cpp.i
+
+CMakeFiles/Automata.dir/src/lexer/tokenizer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Automata.dir/src/lexer/tokenizer.cpp.s"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thoma\OneDrive\Desktop\Automata\src\lexer\tokenizer.cpp -o CMakeFiles\Automata.dir\src\lexer\tokenizer.cpp.s
+
+CMakeFiles/Automata.dir/src/parser/parser.cpp.obj: CMakeFiles/Automata.dir/flags.make
+CMakeFiles/Automata.dir/src/parser/parser.cpp.obj: CMakeFiles/Automata.dir/includes_CXX.rsp
+CMakeFiles/Automata.dir/src/parser/parser.cpp.obj: C:/Users/thoma/OneDrive/Desktop/Automata/src/parser/parser.cpp
+CMakeFiles/Automata.dir/src/parser/parser.cpp.obj: CMakeFiles/Automata.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/Automata.dir/src/parser/parser.cpp.obj"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Automata.dir/src/parser/parser.cpp.obj -MF CMakeFiles\Automata.dir\src\parser\parser.cpp.obj.d -o CMakeFiles\Automata.dir\src\parser\parser.cpp.obj -c C:\Users\thoma\OneDrive\Desktop\Automata\src\parser\parser.cpp
+
+CMakeFiles/Automata.dir/src/parser/parser.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Automata.dir/src/parser/parser.cpp.i"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\thoma\OneDrive\Desktop\Automata\src\parser\parser.cpp > CMakeFiles\Automata.dir\src\parser\parser.cpp.i
+
+CMakeFiles/Automata.dir/src/parser/parser.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Automata.dir/src/parser/parser.cpp.s"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thoma\OneDrive\Desktop\Automata\src\parser\parser.cpp -o CMakeFiles\Automata.dir\src\parser\parser.cpp.s
+
+CMakeFiles/Automata.dir/src/parser/grammar.cpp.obj: CMakeFiles/Automata.dir/flags.make
+CMakeFiles/Automata.dir/src/parser/grammar.cpp.obj: CMakeFiles/Automata.dir/includes_CXX.rsp
+CMakeFiles/Automata.dir/src/parser/grammar.cpp.obj: C:/Users/thoma/OneDrive/Desktop/Automata/src/parser/grammar.cpp
+CMakeFiles/Automata.dir/src/parser/grammar.cpp.obj: CMakeFiles/Automata.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/Automata.dir/src/parser/grammar.cpp.obj"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Automata.dir/src/parser/grammar.cpp.obj -MF CMakeFiles\Automata.dir\src\parser\grammar.cpp.obj.d -o CMakeFiles\Automata.dir\src\parser\grammar.cpp.obj -c C:\Users\thoma\OneDrive\Desktop\Automata\src\parser\grammar.cpp
+
+CMakeFiles/Automata.dir/src/parser/grammar.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Automata.dir/src/parser/grammar.cpp.i"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\thoma\OneDrive\Desktop\Automata\src\parser\grammar.cpp > CMakeFiles\Automata.dir\src\parser\grammar.cpp.i
+
+CMakeFiles/Automata.dir/src/parser/grammar.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Automata.dir/src/parser/grammar.cpp.s"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thoma\OneDrive\Desktop\Automata\src\parser\grammar.cpp -o CMakeFiles\Automata.dir\src\parser\grammar.cpp.s
+
+CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.obj: CMakeFiles/Automata.dir/flags.make
+CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.obj: CMakeFiles/Automata.dir/includes_CXX.rsp
+CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.obj: C:/Users/thoma/OneDrive/Desktop/Automata/src/gui/mainwindow.cpp
+CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.obj: CMakeFiles/Automata.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.obj"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.obj -MF CMakeFiles\Automata.dir\src\gui\mainwindow.cpp.obj.d -o CMakeFiles\Automata.dir\src\gui\mainwindow.cpp.obj -c C:\Users\thoma\OneDrive\Desktop\Automata\src\gui\mainwindow.cpp
+
+CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.i"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\thoma\OneDrive\Desktop\Automata\src\gui\mainwindow.cpp > CMakeFiles\Automata.dir\src\gui\mainwindow.cpp.i
+
+CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.s"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thoma\OneDrive\Desktop\Automata\src\gui\mainwindow.cpp -o CMakeFiles\Automata.dir\src\gui\mainwindow.cpp.s
+
+CMakeFiles/Automata.dir/src/gui/automataview.cpp.obj: CMakeFiles/Automata.dir/flags.make
+CMakeFiles/Automata.dir/src/gui/automataview.cpp.obj: CMakeFiles/Automata.dir/includes_CXX.rsp
+CMakeFiles/Automata.dir/src/gui/automataview.cpp.obj: C:/Users/thoma/OneDrive/Desktop/Automata/src/gui/automataview.cpp
+CMakeFiles/Automata.dir/src/gui/automataview.cpp.obj: CMakeFiles/Automata.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/Automata.dir/src/gui/automataview.cpp.obj"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Automata.dir/src/gui/automataview.cpp.obj -MF CMakeFiles\Automata.dir\src\gui\automataview.cpp.obj.d -o CMakeFiles\Automata.dir\src\gui\automataview.cpp.obj -c C:\Users\thoma\OneDrive\Desktop\Automata\src\gui\automataview.cpp
+
+CMakeFiles/Automata.dir/src/gui/automataview.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Automata.dir/src/gui/automataview.cpp.i"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\thoma\OneDrive\Desktop\Automata\src\gui\automataview.cpp > CMakeFiles\Automata.dir\src\gui\automataview.cpp.i
+
+CMakeFiles/Automata.dir/src/gui/automataview.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Automata.dir/src/gui/automataview.cpp.s"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thoma\OneDrive\Desktop\Automata\src\gui\automataview.cpp -o CMakeFiles\Automata.dir\src\gui\automataview.cpp.s
+
+CMakeFiles/Automata.dir/src/gui/nfaview.cpp.obj: CMakeFiles/Automata.dir/flags.make
+CMakeFiles/Automata.dir/src/gui/nfaview.cpp.obj: CMakeFiles/Automata.dir/includes_CXX.rsp
+CMakeFiles/Automata.dir/src/gui/nfaview.cpp.obj: C:/Users/thoma/OneDrive/Desktop/Automata/src/gui/nfaview.cpp
+CMakeFiles/Automata.dir/src/gui/nfaview.cpp.obj: CMakeFiles/Automata.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/Automata.dir/src/gui/nfaview.cpp.obj"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Automata.dir/src/gui/nfaview.cpp.obj -MF CMakeFiles\Automata.dir\src\gui\nfaview.cpp.obj.d -o CMakeFiles\Automata.dir\src\gui\nfaview.cpp.obj -c C:\Users\thoma\OneDrive\Desktop\Automata\src\gui\nfaview.cpp
+
+CMakeFiles/Automata.dir/src/gui/nfaview.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Automata.dir/src/gui/nfaview.cpp.i"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\thoma\OneDrive\Desktop\Automata\src\gui\nfaview.cpp > CMakeFiles\Automata.dir\src\gui\nfaview.cpp.i
+
+CMakeFiles/Automata.dir/src/gui/nfaview.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Automata.dir/src/gui/nfaview.cpp.s"
+	C:\Qt\Tools\mingw1310_64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\thoma\OneDrive\Desktop\Automata\src\gui\nfaview.cpp -o CMakeFiles\Automata.dir\src\gui\nfaview.cpp.s
 
 # Object files for target Automata
 Automata_OBJECTS = \
 "CMakeFiles/Automata.dir/Automata_autogen/mocs_compilation.cpp.obj" \
-"CMakeFiles/Automata.dir/main.cpp.obj"
+"CMakeFiles/Automata.dir/src/main.cpp.obj" \
+"CMakeFiles/Automata.dir/src/core/nfa.cpp.obj" \
+"CMakeFiles/Automata.dir/src/core/dfa.cpp.obj" \
+"CMakeFiles/Automata.dir/src/core/thompson.cpp.obj" \
+"CMakeFiles/Automata.dir/src/core/subset.cpp.obj" \
+"CMakeFiles/Automata.dir/src/core/tokens.cpp.obj" \
+"CMakeFiles/Automata.dir/src/lexer/tokenizer.cpp.obj" \
+"CMakeFiles/Automata.dir/src/parser/parser.cpp.obj" \
+"CMakeFiles/Automata.dir/src/parser/grammar.cpp.obj" \
+"CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.obj" \
+"CMakeFiles/Automata.dir/src/gui/automataview.cpp.obj" \
+"CMakeFiles/Automata.dir/src/gui/nfaview.cpp.obj"
 
 # External object files for target Automata
 Automata_EXTERNAL_OBJECTS =
 
 Automata.exe: CMakeFiles/Automata.dir/Automata_autogen/mocs_compilation.cpp.obj
-Automata.exe: CMakeFiles/Automata.dir/main.cpp.obj
+Automata.exe: CMakeFiles/Automata.dir/src/main.cpp.obj
+Automata.exe: CMakeFiles/Automata.dir/src/core/nfa.cpp.obj
+Automata.exe: CMakeFiles/Automata.dir/src/core/dfa.cpp.obj
+Automata.exe: CMakeFiles/Automata.dir/src/core/thompson.cpp.obj
+Automata.exe: CMakeFiles/Automata.dir/src/core/subset.cpp.obj
+Automata.exe: CMakeFiles/Automata.dir/src/core/tokens.cpp.obj
+Automata.exe: CMakeFiles/Automata.dir/src/lexer/tokenizer.cpp.obj
+Automata.exe: CMakeFiles/Automata.dir/src/parser/parser.cpp.obj
+Automata.exe: CMakeFiles/Automata.dir/src/parser/grammar.cpp.obj
+Automata.exe: CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.obj
+Automata.exe: CMakeFiles/Automata.dir/src/gui/automataview.cpp.obj
+Automata.exe: CMakeFiles/Automata.dir/src/gui/nfaview.cpp.obj
 Automata.exe: CMakeFiles/Automata.dir/build.make
 Automata.exe: C:/Qt/6.10.0/mingw_64/lib/libQt6Widgets.a
 Automata.exe: C:/Qt/6.10.0/mingw_64/lib/libQt6Gui.a
@@ -119,7 +306,7 @@ Automata.exe: C:/Qt/6.10.0/mingw_64/lib/libQt6EntryPoint.a
 Automata.exe: CMakeFiles/Automata.dir/linkLibs.rsp
 Automata.exe: CMakeFiles/Automata.dir/objects1.rsp
 Automata.exe: CMakeFiles/Automata.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable Automata.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX executable Automata.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\Automata.dir\link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

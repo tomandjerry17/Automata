@@ -33,7 +33,9 @@ qt_add_executable(Automata
     src/gui/automataview.h
     src/gui/automataview.cpp
     src/gui/nfaview.h
-    src/gui/nfaview.cpp 
+    src/gui/nfaview.cpp
+    src/validator/validator.cpp
+    src/validator/validator.h
 )
 
 target_include_directories(Automata PRIVATE src)

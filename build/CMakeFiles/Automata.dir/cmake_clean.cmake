@@ -31,6 +31,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/Automata.dir/src/parser/grammar.cpp.obj.d"
   "CMakeFiles/Automata.dir/src/parser/parser.cpp.obj"
   "CMakeFiles/Automata.dir/src/parser/parser.cpp.obj.d"
+  "CMakeFiles/Automata.dir/src/validator/validator.cpp.obj"
+  "CMakeFiles/Automata.dir/src/validator/validator.cpp.obj.d"
   "libAutomata.dll.a"
 )
 

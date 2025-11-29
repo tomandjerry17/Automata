@@ -23,6 +23,9 @@
         "qhboxlayout": "cpp",
         "qscrollarea": "cpp",
         "qtablewidgetitem": "cpp",
-        "qthread": "cpp"
+        "qthread": "cpp",
+        "qtablewidget": "cpp",
+        "qfont": "cpp",
+        "iostream": "cpp"
     }
 }

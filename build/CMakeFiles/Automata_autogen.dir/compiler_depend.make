@@ -671,7 +671,9 @@ Automata_autogen/timestamp: C:/Program\ Files/CMake/bin/cmake.exe \
   C:/Users/thoma/OneDrive/Desktop/Automata/src/parser/grammar.cpp \
   C:/Users/thoma/OneDrive/Desktop/Automata/src/parser/grammar.h \
   C:/Users/thoma/OneDrive/Desktop/Automata/src/parser/parser.cpp \
-  C:/Users/thoma/OneDrive/Desktop/Automata/src/parser/parser.h
+  C:/Users/thoma/OneDrive/Desktop/Automata/src/parser/parser.h \
+  C:/Users/thoma/OneDrive/Desktop/Automata/src/validator/validator.cpp \
+  C:/Users/thoma/OneDrive/Desktop/Automata/src/validator/validator.h
 
 
 C:/Program\ Files/CMake/share/cmake-4.2/Modules/CMakeGenericSystem.cmake:
@@ -1874,6 +1876,8 @@ C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/ext/align
 
 C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/ext/alloc_traits.h:
 
+C:/Users/thoma/OneDrive/Desktop/Automata/src/validator/validator.cpp:
+
 C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/ext/numeric_traits.h:
 
 C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/ext/type_traits.h:
@@ -2015,3 +2019,5 @@ C:/Users/thoma/OneDrive/Desktop/Automata/src/parser/grammar.cpp:
 C:/Users/thoma/OneDrive/Desktop/Automata/src/parser/grammar.h:
 
 C:/Users/thoma/OneDrive/Desktop/Automata/src/parser/parser.h:
+
+C:/Users/thoma/OneDrive/Desktop/Automata/src/validator/validator.h:

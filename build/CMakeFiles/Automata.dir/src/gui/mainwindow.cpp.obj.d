@@ -484,6 +484,7 @@ CMakeFiles/Automata.dir/src/gui/mainwindow.cpp.obj: \
  C:/Users/thoma/OneDrive/Desktop/Automata/src/core/dfa.h \
  C:/Users/thoma/OneDrive/Desktop/Automata/src/lexer/tokenizer.h \
  C:/Users/thoma/OneDrive/Desktop/Automata/src/parser/grammar.h \
+ C:/Users/thoma/OneDrive/Desktop/Automata/src/validator/validator.h \
  C:/Qt/6.10.0/mingw_64/include/QtWidgets/QVBoxLayout \
  C:/Qt/6.10.0/mingw_64/include/QtWidgets/qboxlayout.h \
  C:/Qt/6.10.0/mingw_64/include/QtWidgets/qlayout.h \

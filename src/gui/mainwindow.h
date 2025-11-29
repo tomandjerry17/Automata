@@ -1,3 +1,5 @@
+// mainwindow.h
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -65,6 +67,9 @@ private:
     std::vector<Token> tokens;
     std::string cur;
     std::vector<NFAView*> nfaViews;
+
+    void buildSimplifiedDFA();
+    std::vector<DFAState> simplifiedDFA;
     
     // DFA Animation
     int dfaState = 0;

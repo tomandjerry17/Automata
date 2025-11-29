@@ -511,6 +511,30 @@ src/parser/parser.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/parser/parser.cpp.s
 .PHONY : src/parser/parser.cpp.s
 
+src/validator/validator.obj: src/validator/validator.cpp.obj
+.PHONY : src/validator/validator.obj
+
+# target to build an object file
+src/validator/validator.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/validator/validator.cpp.obj
+.PHONY : src/validator/validator.cpp.obj
+
+src/validator/validator.i: src/validator/validator.cpp.i
+.PHONY : src/validator/validator.i
+
+# target to preprocess a source file
+src/validator/validator.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/validator/validator.cpp.i
+.PHONY : src/validator/validator.cpp.i
+
+src/validator/validator.s: src/validator/validator.cpp.s
+.PHONY : src/validator/validator.s
+
+# target to generate assembly for a file
+src/validator/validator.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Automata.dir\build.make CMakeFiles/Automata.dir/src/validator/validator.cpp.s
+.PHONY : src/validator/validator.cpp.s
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -565,6 +589,9 @@ help:
 	@echo ... src/parser/parser.obj
 	@echo ... src/parser/parser.i
 	@echo ... src/parser/parser.s
+	@echo ... src/validator/validator.obj
+	@echo ... src/validator/validator.i
+	@echo ... src/validator/validator.s
 .PHONY : help
 
 

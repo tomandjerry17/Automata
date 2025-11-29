@@ -17,6 +17,7 @@ public:
     explicit NFAView(QWidget *parent = nullptr);
     
     void buildFromNFA(const NFAFragment &fragment, const FullNFA &nfa, const QString &label);
+    void buildCombinedNFA(const FullNFA &nfa);
     void clear();
 
 private:

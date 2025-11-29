@@ -399,7 +399,13 @@ CMakeFiles/Automata.dir/src/gui/nfaview.cpp.obj: \
  C:/Qt/6.10.0/mingw_64/include/QtWidgets/QGraphicsTextItem \
  C:/Qt/6.10.0/mingw_64/include/QtWidgets/QGraphicsPathItem \
  C:/Users/thoma/OneDrive/Desktop/Automata/src/core/nfa.h \
+ C:/Users/thoma/OneDrive/Desktop/Automata/src/core/tokens.h \
  C:/Qt/6.10.0/mingw_64/include/QtGui/QPainterPath \
  C:/Qt/6.10.0/mingw_64/include/QtGui/qpainterpath.h \
  C:/Qt/6.10.0/mingw_64/include/QtGui/QFont \
- C:/Qt/6.10.0/mingw_64/include/QtGui/qfont.h
+ C:/Qt/6.10.0/mingw_64/include/QtGui/qfont.h \
+ C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/queue \
+ C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/deque \
+ C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/stl_deque.h \
+ C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/deque.tcc \
+ C:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/stl_queue.h

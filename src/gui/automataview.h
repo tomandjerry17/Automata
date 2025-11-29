@@ -38,7 +38,28 @@ private:
     int activeState = -1;
     std::vector<DFAState> dfa;
     
+    // Layout functions
+    void buildSimplifiedLayout();
+    void buildBFSLayout();
     void fitSceneInView();
+    
+    // Node creation
+    void createNode(int stateId, double x, double y);
+    void addStartArrow(int startState);
+    
+    // Edge drawing functions
+    void drawSelfLoop(int stateId, const std::vector<char> &chars);
+    void drawDirectedEdge(int fromId, int toId, const std::vector<char> &chars, bool curved);
+    void drawBidirectionalEdge(int fromId, int toId, 
+                              const std::vector<char> &forwardChars,
+                              const std::vector<char> &backwardChars);
+    
+    // NEW: Clearer bidirectional with better separation
+    void drawBidirectionalEdgeClear(int fromId, int toId,
+                                    const std::vector<char> &forwardChars,
+                                    const std::vector<char> &backwardChars);
+    
+    // Utilities
     QString formatEdgeLabel(const std::vector<char> &chars);
     void drawArrowHead(double x1, double y1, double x2, double y2, QColor color = QColor(80, 80, 80));
 };

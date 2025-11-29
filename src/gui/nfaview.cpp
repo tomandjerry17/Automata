@@ -1,8 +1,10 @@
 #include "nfaview.h"
+#include "core/tokens.h"
 #include <QPainterPath>
 #include <QFont>
 #include <cmath>
 #include <set>
+#include <queue>
 
 NFAView::NFAView(QWidget *parent) : QGraphicsView(parent) {
     setScene(new QGraphicsScene(this));
@@ -116,4 +118,122 @@ void NFAView::drawArrowHead(double x1, double y1, double x2, double y2, QColor c
     QPolygonF arrowHead;
     arrowHead << line.p2() << p1 << p2;
     scene()->addPolygon(arrowHead, QPen(color), QBrush(color));
+}
+
+void NFAView::buildCombinedNFA(const FullNFA &nfa) {
+    clear();
+    
+    if(nfa.states.empty()) return;
+    
+    // Group states by "depth" from start using BFS
+    std::map<int, int> depth;
+    std::queue<int> q;
+    std::set<int> visited;
+    
+    q.push(nfa.start);
+    depth[nfa.start] = 0;
+    visited.insert(nfa.start);
+    
+    while(!q.empty()) {
+        int curr = q.front();
+        q.pop();
+        
+        for(const auto &trans : nfa.states[curr].trans) {
+            int next = trans.to;
+            if(!visited.count(next)) {
+                visited.insert(next);
+                depth[next] = depth[curr] + 1;
+                q.push(next);
+            }
+        }
+    }
+    
+    // Group states by depth
+    std::map<int, std::vector<int>> layers;
+    int maxDepth = 0;
+    for(const auto &p : depth) {
+        layers[p.second].push_back(p.first);
+        maxDepth = std::max(maxDepth, p.second);
+    }
+    
+    // Layout
+    double width = 1200;
+    double height = 400;
+    double layerSpacing = width / (maxDepth + 2);
+    
+    std::map<int, std::pair<double, double>> positions;
+    
+    for(const auto &layer : layers) {
+        int layerNum = layer.first;
+        const auto &stateList = layer.second;
+        double x = layerSpacing * (layerNum + 1);
+        double stateSpacing = height / (stateList.size() + 1);
+        
+        for(size_t i = 0; i < stateList.size(); i++) {
+            int stateId = stateList[i];
+            double y = stateSpacing * (i + 1);
+            positions[stateId] = {x, y};
+            
+            // Determine if this is an accept state
+            bool isAccept = nfa.acceptToken.count(stateId) > 0;
+            bool isStart = (stateId == nfa.start);
+            
+            QString label = QString("q%1").arg(stateId);
+            if(isAccept) {
+                int tokenId = nfa.acceptToken.at(stateId);
+                label += QString("\n[%1]").arg(QString::fromStdString(tokenNames[tokenId]));
+            }
+            
+            drawState(stateId, x, y, isStart, isAccept, label);
+        }
+    }
+    
+    // Draw all transitions
+    std::set<std::pair<int, int>> drawnEdges;
+    
+    for(const auto &state : nfa.states) {
+        int fromId = state.id;
+        if(!positions.count(fromId)) continue;
+        
+        for(const auto &trans : state.trans) {
+            int toId = trans.to;
+            if(!positions.count(toId)) continue;
+            
+            // Skip if already drawn
+            if(drawnEdges.count({fromId, toId})) continue;
+            drawnEdges.insert({fromId, toId});
+            
+            // Get transition label
+            QString transLabel;
+            if(trans.kind == L_EPS) {
+                transLabel = "ε";
+            } else if(trans.kind == L_CHAR) {
+                transLabel = QString(QChar(trans.ch));
+            } else if(trans.kind == L_DIGIT) {
+                transLabel = "[0-9]";
+            } else if(trans.kind == L_LETTER) {
+                transLabel = "[a-z, A-Z]";
+            } else if(trans.kind == L_ALNUM_UNDERSCORE) {
+                transLabel = "[alnum_]";
+            }
+            
+            drawTransition(fromId, toId, transLabel, nfa);
+        }
+    }
+    
+    
+    // Add info box
+    QGraphicsTextItem *info = scene()->addText(
+        QString("States: %1 | Start: q%2 | Accept States: %3")
+            .arg(nfa.states.size())
+            .arg(nfa.start)
+            .arg(nfa.acceptToken.size())
+    );
+    QFont infoFont = info->font();
+    infoFont.setPointSize(8);
+    info->setFont(infoFont);
+    info->setDefaultTextColor(QColor(100, 100, 100));
+    info->setPos(20, height + 20);
+    
+    scene()->setSceneRect(scene()->itemsBoundingRect().adjusted(-30, -30, 30, 30));
 }

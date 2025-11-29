@@ -3,6 +3,7 @@
 #include "core/subset.h"
 #include "lexer/tokenizer.h"
 #include "parser/grammar.h"
+#include "validator/validator.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPainterPath>
@@ -28,113 +29,206 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     
     // Create tab widget
     tabWidget = new QTabWidget();
-    
+
     // ============================================
-    // TAB 1: NFA Construction (Thompson's)
+    // TAB 1: Project Overview + Thompson's Construction
     // ============================================
     QWidget *tab1 = new QWidget();
     QVBoxLayout *tab1Layout = new QVBoxLayout(tab1);
-    
-    QLabel *tab1Title = new QLabel("<h2 style='color:#2C5F2D;'>Tab 1: NFA Construction (Thompson's Construction)</h2>");
-    tab1Title->setTextFormat(Qt::RichText);
-    tab1Layout->addWidget(tab1Title);
-    
-    auto *buildNfaBtn = new QPushButton("Build NFA from Regular Expressions");
-    tab1Layout->addWidget(buildNfaBtn);
-    
-    QLabel *tab1Info = new QLabel(
-        "<b>Objective:</b> Convert regular expressions into NFAs using Thompson's construction.<br>"
-        "<b>Status:</b> Click 'Build NFA' to visualize individual NFAs for each token type."
+
+    // Project Overview Section
+    QLabel *projectTitle = new QLabel(
+        "<h1 style='color:#2C5F2D;'>🎓 Compiler Front-End Visualizer</h1>"
     );
-    tab1Info->setTextFormat(Qt::RichText);
-    tab1Info->setWordWrap(true);
-    tab1Layout->addWidget(tab1Info);
-    
-    // NFA Views for each token type
+    projectTitle->setTextFormat(Qt::RichText);
+    projectTitle->setAlignment(Qt::AlignCenter);
+    tab1Layout->addWidget(projectTitle);
+
+    // QTextEdit *overviewText = new QTextEdit();
+    // overviewText->setReadOnly(true);
+    // overviewText->setMaximumHeight(150);
+    // overviewText->setHtml(
+    //     "<h3>📚 Project Overview</h3>"
+    //     "<p>This application demonstrates the <b>formal language hierarchy</b> in compiler design:</p>"
+    //     "<ul>"
+    //     "<li><b>Regular Languages (Type 3):</b> Handled by Finite Automata (DFA/NFA) for <b>Lexical Analysis</b></li>"
+    //     "<li><b>Context-Free Languages (Type 2):</b> Handled by Pushdown Automata (PDA) for <b>Syntactic Analysis</b></li>"
+    //     "</ul>"
+    //     "<p><b>Supported Language:</b> Arithmetic expressions with identifiers, numbers, and operators (+, -, *, /, parentheses)</p>"
+    // );
+    // tab1Layout->addWidget(overviewText);
+
+    // // Thompson's Construction Section
+    // QLabel *thompsonTitle = new QLabel("<h2 style='color:#2C5F2D;'>Thompson's Construction Algorithm</h2>");
+    // thompsonTitle->setTextFormat(Qt::RichText);
+    // tab1Layout->addWidget(thompsonTitle);
+
+    // QTextEdit *thompsonExplanation = new QTextEdit();
+    // thompsonExplanation->setReadOnly(true);
+    // thompsonExplanation->setMaximumHeight(120);  // Reduced from 150
+    // thompsonExplanation->setStyleSheet("QTextEdit { background-color: #F0F8F0; }");
+    // thompsonExplanation->setHtml(
+    //     "<b>Thompson's Construction</b> builds NFAs compositionally using these building blocks:<br><br>"
+    //     "<b>1. Atomic:</b> Single character → 2-state NFA<br>"
+    //     "<b>2. Concatenation (ab):</b> Connect NFAs with ε-transition<br>"
+    //     "<b>3. Union (a|b):</b> Create new start/accept states with ε-transitions<br>"
+    //     "<b>4. Kleene Star (a*):</b> Add ε-loops for zero-or-more repetition<br><br>"
+    //     "<i>Click below to see the complete NFA with consistent state numbering.</i>"
+    // );
+    // tab1Layout->addWidget(thompsonExplanation);
+
+    auto *buildNfaBtn = new QPushButton("Show Thompson's NFA");
+    buildNfaBtn->setStyleSheet("QPushButton { background-color: #4CAF50; color: white; font-weight: bold; padding: 10px; }");
+    tab1Layout->addWidget(buildNfaBtn);
+
+    // UPDATED: Single large NFA view instead of 9 separate views
     QScrollArea *nfaScrollArea = new QScrollArea();
     QWidget *nfaContainer = new QWidget();
     QVBoxLayout *nfaContainerLayout = new QVBoxLayout(nfaContainer);
 
-    // Create individual NFA views
-    QStringList tokenLabels = {"ID", "NUMBER", "PLUS (+)", "MINUS (-)", "STAR (*)", "SLASH (/)", "LPAREN (()", "RPAREN ())", "WHITESPACE"};
+    // Create ONE combined NFA view
+    NFAView *combinedNFAView = new NFAView();
+    combinedNFAView->setMaximumHeight(500);  // Large enough for complex diagram
+    nfaViews.push_back(combinedNFAView);
 
-    for(const QString &label : tokenLabels) {
-        NFAView *nfaView = new NFAView();
-        nfaViews.push_back(nfaView);
-        
-        QGroupBox *groupBox = new QGroupBox(QString("Token: %1").arg(label));
-        QVBoxLayout *groupLayout = new QVBoxLayout(groupBox);
-        groupLayout->addWidget(nfaView);
-        
-        nfaContainerLayout->addWidget(groupBox);
-    }
+    QGroupBox *groupBox = new QGroupBox("NFA: All Token Types with Consistent State Numbering");
+    QVBoxLayout *groupLayout = new QVBoxLayout(groupBox);
+
+    // Explanation label
+    QLabel *explanation = new QLabel();
+    explanation->setWordWrap(true);
+    explanation->setStyleSheet("QLabel { color: #555; font-size: 9pt; padding: 8px; background-color: #FFFEF0; border-left: 4px solid #4CAF50; }");
+    explanation->setText(
+        "📊 <b>This diagram shows the COMPLETE NFA</b> built using Thompson's Construction. <br>"
+        "<b>All token types (ID, NUMBER, PLUS, MINUS, STAR, SLASH, LPAREN, RPAREN, WHITESPACE) are into a single automaton with <b>consistent state numbering</b> (q0, q1, q2, ...).<br>"
+        "<b>🔹 The super-start state q0</b> connects to each token's sub-NFA via <b>ε-transitions.<br>"
+        "<b>🔹 Each <b>accept state</b> is labeled with its token type (e.g., [ID], [NUMBER]).<br>"
+        "<b>🔹 This NFA is then converted to DFA using <b>Subset Construction</b> (see Tab 2).<br>"
+    );
+
+    groupLayout->addWidget(explanation);
+    groupLayout->addWidget(combinedNFAView);
+
+    nfaContainerLayout->addWidget(groupBox);
+
+    // Add legend/token reference
+    QTextEdit *tokenReference = new QTextEdit();
+    tokenReference->setReadOnly(true);
+    tokenReference->setMaximumHeight(120);
+    tokenReference->setStyleSheet("QTextEdit { background-color: #F5F5DC; font-family: 'Courier New'; font-size: 8pt; }");
+    tokenReference->setHtml(
+        "<b>Token Types in NFA:</b><br>"
+        "<table style='width:100%; font-size: 8pt;'>"
+        "<tr><td><b>ID:</b></td><td>[a-zA-Z][a-zA-Z0-9_]*</td><td style='color:#666;'>(identifiers: a, foo, var_1)</td></tr>"
+        "<tr><td><b>NUMBER:</b></td><td>[0-9]+(\\.[0-9]+)?</td><td style='color:#666;'>(integers & decimals: 42, 3.14)</td></tr>"
+        "<tr><td><b>PLUS:</b></td><td>+</td><td style='color:#666;'>(addition operator)</td></tr>"
+        "<tr><td><b>MINUS:</b></td><td>-</td><td style='color:#666;'>(subtraction/negation)</td></tr>"
+        "<tr><td><b>STAR:</b></td><td>*</td><td style='color:#666;'>(multiplication operator)</td></tr>"
+        "<tr><td><b>SLASH:</b></td><td>/</td><td style='color:#666;'>(division operator)</td></tr>"
+        "<tr><td><b>LPAREN:</b></td><td>(</td><td style='color:#666;'>(left parenthesis)</td></tr>"
+        "<tr><td><b>RPAREN:</b></td><td>)</td><td style='color:#666;'>(right parenthesis)</td></tr>"
+        "<tr><td><b>WHITESPACE:</b></td><td>( | \\t)+</td><td style='color:#666;'>(spaces and tabs)</td></tr>"
+        "</table>"
+    );
+    nfaContainerLayout->addWidget(tokenReference);
 
     nfaScrollArea->setWidget(nfaContainer);
     nfaScrollArea->setWidgetResizable(true);
     tab1Layout->addWidget(nfaScrollArea);
-    
-    tabWidget->addTab(tab1, "1. NFA Construction");
+
+    tabWidget->addTab(tab1, "1. Thompson's NFA");
     
     // ============================================
     // TAB 2: DFA Conversion (Subset Construction)
     // ============================================
     QWidget *tab2 = new QWidget();
     QVBoxLayout *tab2Layout = new QVBoxLayout(tab2);
-    
-    QLabel *tab2Title = new QLabel("<h2 style='color:#1E5F8C;'>Tab 2: DFA Conversion (Subset Construction)</h2>");
+    tab2Layout->setSpacing(8); // Tighter spacing
+    tab2Layout->setContentsMargins(10, 10, 10, 10);
+
+    QLabel *tab2Title = new QLabel("<h2 style='color:#1E5F8C; margin:0;'>DFA & Tokenization</h2>");
     tab2Title->setTextFormat(Qt::RichText);
     tab2Layout->addWidget(tab2Title);
-    
-    auto *lexBtn = new QPushButton("Tokenize (Build DFA)");
+
+    // Compact explanation (collapsible would be better, but simplified for now)
+    QTextEdit *subsetExplanation = new QTextEdit();
+    subsetExplanation->setReadOnly(true);
+    subsetExplanation->setMaximumHeight(40); // Reduced from 120
+    subsetExplanation->setStyleSheet("QTextEdit { background-color: #E8F4F8; font-size: 9pt; padding: 5px; }");
+    subsetExplanation->setHtml(
+        "<b>Subset Construction:</b> Converts NFA → DFA by treating sets of NFA states as single DFA states. "
+        "The DFA below is simplified (6 states) for educational clarity."
+    );
+    tab2Layout->addWidget(subsetExplanation);
+
+    // Buttons in compact row
+    auto *lexBtn = new QPushButton("Tokenize");
     auto *animBtn = new QPushButton("Animate DFA");
     auto *stopBtn = new QPushButton("Stop");
     auto *resetBtn = new QPushButton("Reset");
-    auto *clearBtn = new QPushButton("Clear Output");
-    
+    auto *clearBtn = new QPushButton("Clear");
+
+    lexBtn->setStyleSheet("QPushButton { background-color: #4CAF50; color: white; font-weight: bold; padding: 8px; }");
+    animBtn->setStyleSheet("QPushButton { background-color: #2196F3; color: white; font-weight: bold; padding: 8px; }");
+
     auto *tab2Btns = new QHBoxLayout();
+    tab2Btns->setSpacing(5);
     tab2Btns->addWidget(lexBtn);
     tab2Btns->addWidget(animBtn);
     tab2Btns->addWidget(stopBtn);
     tab2Btns->addWidget(resetBtn);
     tab2Btns->addWidget(clearBtn);
+    tab2Btns->addStretch();
     tab2Layout->addLayout(tab2Btns);
-    
+
+    // Input display
     inputDisplay = new QLabel();
-    inputDisplay->setStyleSheet("QLabel { background-color: #f0f0f0; padding: 5px; font-family: monospace; font-size: 11pt; }");
+    inputDisplay->setStyleSheet("QLabel { background-color: #f0f0f0; padding: 5px; font-family: monospace; font-size: 10pt; }");
+    inputDisplay->setMaximumHeight(30);
     tab2Layout->addWidget(inputDisplay);
-    
+
+    // DFA View - Give it more space!
     view = new AutomataView();
-    view->setMinimumHeight(350);
-    tab2Layout->addWidget(view);
-    
-    // Add DFA info
+    view->setMinimumHeight(400); // Increased
+    view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    tab2Layout->addWidget(view, 1); // Stretch factor 1
+
+    // DFA info (compact)
     dfaInfo = new QLabel();
     dfaInfo->setTextFormat(Qt::RichText);
     dfaInfo->setWordWrap(true);
-    dfaInfo->setStyleSheet("QLabel { background-color: #E8F4F8; padding: 10px; border: 1px solid #1E5F8C; border-radius: 5px; }");
+    dfaInfo->setMaximumHeight(100); // Reduced
+    dfaInfo->setStyleSheet("QLabel { background-color: #E8F4F8; padding: 8px; border: 1px solid #1E5F8C; border-radius: 3px; font-size: 9pt; }");
+    dfaInfo->setText(
+        "<b>📊 Simplified Educational DFA:</b> "
+        "5 states (q0-q4)"
+    );
     tab2Layout->addWidget(dfaInfo);
 
-    // Tokens and trace side by side
+    // Tokens and trace side by side (compact)
     auto *tab2Bottom = new QHBoxLayout();
+    tab2Bottom->setSpacing(10);
 
     auto *tokensLayout = new QVBoxLayout();
     tokensLayout->addWidget(new QLabel("<b>Tokens:</b>"));
     tokensBox = new QListWidget();
-    tokensBox->setMaximumHeight(150);
+    tokensBox->setMaximumHeight(120); // Reduced from 150
+    tokensBox->setStyleSheet("QListWidget { font-size: 9pt; }");
     tokensLayout->addWidget(tokensBox);
     tab2Bottom->addLayout(tokensLayout);
 
     auto *traceLayout = new QVBoxLayout();
-    traceLayout->addWidget(new QLabel("<b>DFA Animation Trace:</b>"));
+    traceLayout->addWidget(new QLabel("<b>Output Trace:</b>"));
     trace = new QTextEdit();
     trace->setReadOnly(true);
-    trace->setMaximumHeight(150);
+    trace->setMaximumHeight(120); // Reduced from 150
+    trace->setStyleSheet("QTextEdit { font-size: 9pt; }");
     traceLayout->addWidget(trace);
     tab2Bottom->addLayout(traceLayout);
 
     tab2Layout->addLayout(tab2Bottom);
-    
-    tabWidget->addTab(tab2, "2. DFA Conversion");
+
+    tabWidget->addTab(tab2, "2. DFA & Tokenization");
     
     // ============================================
     // TAB 3: PDA Parser (Syntactic Analysis)
@@ -266,8 +360,9 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     // Initialize backend
     // ============================================
     nfa = buildCombinedNFA();
-    dfa = subsetConstruct(nfa);
-    view->buildFromDFA(dfa);
+    dfa = subsetConstruct(nfa);  // Keep real DFA for tokenization
+    buildSimplifiedDFA();  // Build simplified DFA for visualization
+    view->buildFromDFA(simplifiedDFA);  // Display simplified version
     fillGrammar();
     
     // ============================================
@@ -334,63 +429,41 @@ void MainWindow::updateParseInputDisplay() {
 }
 
 void MainWindow::onBuildNFA() {
-    // Build individual NFAs for each token
-    FullNFA tempNfa;
-    tempNfa.start = tempNfa.newState();
+    // Instead of building individual NFAs, show the COMBINED NFA with consistent numbering
     
-    // ID
-    auto letter = makeAtomic(tempNfa, L_LETTER);
-    auto alnum = makeAtomic(tempNfa, L_ALNUM_UNDERSCORE);
-    auto idFrag = concatFrag(tempNfa, letter, starFrag(tempNfa, alnum));
-    nfaViews[0]->buildFromNFA(idFrag, tempNfa, "[a-zA-Z][a-zA-Z0-9_]*");
+    // Clear all NFA views first
+    for(auto *view : nfaViews) {
+        view->clear();
+    }
     
-    // NUMBER
-    FullNFA numNfa;
-    numNfa.start = numNfa.newState();
-    auto digit = makeAtomic(numNfa, L_DIGIT);
-    auto digitPlus = concatFrag(numNfa, digit, starFrag(numNfa, makeAtomic(numNfa, L_DIGIT)));
-    nfaViews[1]->buildFromNFA(digitPlus, numNfa, "[0-9]+(\\.[0-9]+)?");
+    // Build the complete combined NFA (same as used for tokenization)
+    FullNFA combinedNFA = buildCombinedNFA();
     
-    // Simple operators
-    FullNFA plusNfa;
-    plusNfa.start = plusNfa.newState();
-    auto plusFrag = makeAtomic(plusNfa, L_CHAR, '+');
-    nfaViews[2]->buildFromNFA(plusFrag, plusNfa, "+");
+    trace->append("✅ NFA constructed using Thompson's Construction!");
+    trace->append(QString("📊 Total NFA states: %1").arg(combinedNFA.states.size()));
+    trace->append(QString("🎯 Start state: q%1").arg(combinedNFA.start));
+    trace->append(QString("✓ Accept states: %1").arg(combinedNFA.acceptToken.size()));
     
-    FullNFA minusNfa;
-    minusNfa.start = minusNfa.newState();
-    auto minusFrag = makeAtomic(minusNfa, L_CHAR, '-');
-    nfaViews[3]->buildFromNFA(minusFrag, minusNfa, "-");
+    // For Tab 1, show a SINGLE combined NFA diagram instead of 9 separate ones
+    // We'll use the first nfaView as a larger combined view
     
-    FullNFA starNfa;
-    starNfa.start = starNfa.newState();
-    auto starFragOp = makeAtomic(starNfa, L_CHAR, '*');
-    nfaViews[4]->buildFromNFA(starFragOp, starNfa, "*");
+    if(!nfaViews.empty()) {
+        // Build combined view showing all token paths
+        nfaViews[0]->buildCombinedNFA(combinedNFA);
+        
+        // Hide other views or show summary
+        for(size_t i = 1; i < nfaViews.size(); i++) {
+            nfaViews[i]->hide();
+        }
+    }
     
-    FullNFA slashNfa;
-    slashNfa.start = slashNfa.newState();
-    auto slashFrag = makeAtomic(slashNfa, L_CHAR, '/');
-    nfaViews[5]->buildFromNFA(slashFrag, slashNfa, "/");
-    
-    FullNFA lparenNfa;
-    lparenNfa.start = lparenNfa.newState();
-    auto lparenFrag = makeAtomic(lparenNfa, L_CHAR, '(');
-    nfaViews[6]->buildFromNFA(lparenFrag, lparenNfa, "(");
-    
-    FullNFA rparenNfa;
-    rparenNfa.start = rparenNfa.newState();
-    auto rparenFrag = makeAtomic(rparenNfa, L_CHAR, ')');
-    nfaViews[7]->buildFromNFA(rparenFrag, rparenNfa, ")");
-    
-    // Whitespace
-    FullNFA wsNfa;
-    wsNfa.start = wsNfa.newState();
-    auto space = makeAtomic(wsNfa, L_CHAR, ' ');
-    auto tab = makeAtomic(wsNfa, L_CHAR, '\t');
-    auto wsUnion = unionFrag(wsNfa, space, tab);
-    nfaViews[8]->buildFromNFA(starFrag(wsNfa, wsUnion), wsNfa, "( | \\t)*");
-    
-    trace->append("✅ Individual NFAs constructed using Thompson's Construction!");
+    // Update explanation
+    trace->append("");
+    trace->append("ℹ️ The NFA shows how Thompson's Construction:");
+    trace->append("  • Creates a super-start state q0");
+    trace->append("  • Connects to each token's NFA via ε-transitions");
+    trace->append("  • Maintains consistent state numbering across all tokens");
+    trace->append("  • Each accept state is tagged with its token type");
 }
 
 void MainWindow::onLex() {
@@ -415,7 +488,6 @@ void MainWindow::onLex() {
                 .arg(QString::fromStdString(tokens[i].lexeme)));
     }
     
-    // Display DFA construction info
     int totalDFAStates = dfa.size();
     int acceptStates = 0;
     for(const auto &state : dfa) {
@@ -423,17 +495,14 @@ void MainWindow::onLex() {
     }
     
     dfaInfo->setText(QString(
-        "<b style='color:green;'>✅ DFA Construction Complete</b><br>"
-        "<b>Subset Construction Result:</b><br>"
-        "• Total DFA States: <b>%1</b><br>"
-        "• Accept States: <b>%2</b><br>"
-        "• Start State: <b>q0</b> (single circle)<br>"
-        "• Tokens Found: <b>%3</b><br>"
-        "<i>💡 The DFA was built by combining all token NFAs and applying subset construction.</i>"
-    ).arg(totalDFAStates).arg(acceptStates).arg(tokens.size() - 1)); // -1 for EOF
+        "<b style='color:green;'>✅ Tokenization Complete</b><br>"
+        "<b>Simplified DFA (for animation):</b> 5 states (q0-q4)<br>"
+        "• q0: START<br> • q1: ID (identifiers) • q2: NUMBER (integers/decimals) • q3: OPERATOR (+,−,*,/,(,)) • q4: WHITESPACE (spaces/tabs)<br>"
+        "<i>💡 Click 'Animate DFA' to see character-by-character processing</i>"
+    ).arg(totalDFAStates).arg(acceptStates));
     
     trace->append("✅ Lexing complete.");
-    trace->append(QString("📊 DFA has %1 states (%2 accept states)").arg(totalDFAStates).arg(acceptStates));
+    trace->append(QString("📊 Found %1 tokens").arg(tokens.size() - 1));
     updateInputDisplay();
     resetDFA();
 }
@@ -448,13 +517,25 @@ void MainWindow::onParse() {
         return;
     }
     
+    // VALIDATION BEFORE PARSING
+    parseTrace->append("🔍 Validating expression structure...");
+    ValidationResult validation = ExpressionValidator::validate(tokens);
+    
+    if(!validation.valid) {
+        parseTrace->append("<b style='color:red;'>❌ VALIDATION FAILED</b>");
+        parseTrace->append(QString("Error: %1").arg(QString::fromStdString(validation.error)));
+        trace->append("❌ Parse rejected - validation failed");
+        return;
+    }
+    
+    parseTrace->append("✅ Expression structure valid");
+    parseTrace->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    
     parser.reset();
     pdaAnimationSteps.clear();
     
     parseTrace->append("🔨 Analyzing expression and building PDA animation...");
-    parseTrace->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     
-    // Start state
     pdaAnimationSteps.push_back({"Start", "Initialize parser", "Push $ and E", "q_start"});
     
     int step = 1;
@@ -477,7 +558,6 @@ void MainWindow::onParse() {
         auto stackAfter = parser.getStack();
         int posAfter = parser.getCurrentPosition();
         
-        // Determine which state we're in based on stack top
         std::string stateId = "q_start";
         QString stateName = "Processing";
         QString action = "Processing";
@@ -486,7 +566,6 @@ void MainWindow::onParse() {
         if(!stackBefore.empty()) {
             std::string top = stackBefore.back();
             
-            // Map stack symbol to state
             if(top == "E") {
                 stateId = "q_E";
                 stateName = "E (Expression)";
@@ -546,7 +625,6 @@ void MainWindow::onParse() {
         step++;
     }
     
-    // Accept state
     pdaAnimationSteps.push_back({"Accept", "✅ Input fully parsed", "Stack empty, $ matched", "q_accept"});
     
     parseTrace->append(QString("📊 Generated %1 animation steps").arg(pdaAnimationSteps.size()));
@@ -554,60 +632,117 @@ void MainWindow::onParse() {
     parseTrace->append("");
     trace->append("✅ Parse Accepted");
     
-    // Start animation
     pdaAnimStep = 0;
     updateParseInputDisplay();
-    pdaTimer->start(1200);  // 1.2 seconds per step
+    pdaTimer->start(1200);
 }
 
 void MainWindow::onAnimateDFA() {
-    if(tokens.empty()) {
-        trace->append("⚠ Please lex first.");
+    if(cur.empty()) {
+        trace->append("⚠ Please enter an expression first.");
         return;
     }
     
-    // FIRST: Check if parse will succeed
+    if(tokens.empty()) {
+        trace->append("⚠ Please tokenize first.");
+        return;
+    }
+    
+    trace->clear();
+    trace->append("🔍 Validating expression...");
+    trace->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    
+    // STEP 1: Expression Validation
+    ValidationResult validation = ExpressionValidator::validate(tokens);
+    
+    if(!validation.valid) {
+        trace->append("<b style='color:red;'>❌ VALIDATION FAILED</b>");
+        trace->append(QString("   Error: %1").arg(QString::fromStdString(validation.error)));
+        if(validation.errorPosition >= 0 && validation.errorPosition < (int)tokens.size()) {
+            trace->append(QString("   At token %1: '%2'")
+                .arg(validation.errorPosition)
+                .arg(QString::fromStdString(tokens[validation.errorPosition].lexeme)));
+        }
+        trace->append("");
+        trace->append("💡 <b>Common issues:</b>");
+        trace->append("   • Adjacent operators: 3++5 → invalid");
+        trace->append("   • Ending with operator: a+ → invalid");
+        trace->append("   • Unbalanced parentheses: (3+5)) → invalid");
+        trace->append("   • Unary without parens: -3 → invalid, use (-3)");
+        return;
+    }
+    
+    trace->append("✅ Expression structure valid");
+    trace->append("");
+    
+    // STEP 2: Parser Check
+    trace->append("🔍 Checking parser acceptance...");
     Parser testParser;
     bool parseWillSucceed = testParser.parseAll(tokens);
     
     if(!parseWillSucceed) {
-        trace->append("❌ Cannot animate: Expression is invalid (parse rejected)");
-        trace->append("💡 DFA animation only runs for valid expressions");
+        trace->append("<b style='color:red;'>❌ PARSER REJECTED</b>");
+        trace->append("   The expression structure is invalid");
         return;
     }
     
-    // Parse succeeded, proceed with animation
-    animationSteps.clear();
-    currentTokenIndex = 0;
+    trace->append("✅ Parser accepts expression");
+    trace->append("");
     
-    for(const auto &token : tokens) {
-        if(token.id == 0) break;
+    // STEP 3: DFA Animation
+    animationSteps.clear();
+    
+    int state = 0;
+    std::string inputStr = cur;
+    
+    trace->append("▶ Starting DFA animation...");
+    trace->append(QString("   Input: \"%1\"").arg(QString::fromStdString(inputStr)));
+    trace->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    
+    bool hasError = false;
+    for(size_t i = 0; i < inputStr.size(); i++) {
+        char c = inputStr[i];
         
-        std::string lexeme = token.lexeme;
-        int state = 0;
+        auto it = simplifiedDFA[state].trans.find(c);
         
-        for(size_t i = 0; i < lexeme.size(); i++) {
-            char c = lexeme[i];
-            auto it = dfa[state].trans.find(c);
-            if(it == dfa[state].trans.end()) break;
-            
-            int nextState = it->second;
-            animationSteps.push_back({
-                state, nextState, c, token.pos + (int)i,
-                QString::fromStdString(tokenNames[token.id])
-            });
-            state = nextState;
+        if(it == simplifiedDFA[state].trans.end()) {
+            // No transition - STOP animation here
+            trace->append(QString("<b style='color:red;'>❌ ERROR at position %1</b>").arg(i));
+            trace->append(QString("   No transition for character '%1' from state q%2")
+                .arg(QChar(c)).arg(state));
+            trace->append("   This should have been caught by validation!");
+            hasError = true;
+            break;
         }
         
-        if(&token != &tokens.back() - 1) {
-            animationSteps.push_back({state, 0, '\0', -1, "RESET"});
-        }
+        int nextState = it->second;
+        QString tokenContext;
+        
+        if(nextState == 1) tokenContext = "ID";
+        else if(nextState == 2) tokenContext = "NUM";
+        else if(nextState == 3) tokenContext = "OP";
+        else if(nextState == 4) tokenContext = "WS";
+        else tokenContext = "?";
+        
+        animationSteps.push_back({
+            state, 
+            nextState, 
+            c, 
+            (int)i,
+            tokenContext
+        });
+        
+        state = nextState;
+    }
+    
+    if(hasError) {
+        return;
     }
     
     animationStep = 0;
-    trace->append("✅ Expression is valid!");
-    trace->append("▶ Starting DFA animation for valid expression...");
-    trace->append(QString("Total steps: %1").arg(animationSteps.size()));
+    dfaState = 0;
+    dfaPos = 0;
+    
     timer->start(600);
 }
 
@@ -625,36 +760,55 @@ void MainWindow::onResetDFA() {
 
 void MainWindow::dfaStepTimer() {
     if(animationStep >= (int)animationSteps.size()) {
-        trace->append("✅ Token recognition complete!");
+        trace->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        
+        if(simplifiedDFA[dfaState].accept) {
+            trace->append("<b style='color:green;'>✅ ACCEPTED!</b> Valid expression");
+            
+            QString stateLabel = "";
+            if(dfaState == 1) stateLabel = "[ID]";
+            else if(dfaState == 2) stateLabel = "[NUM]";
+            else if(dfaState == 3) stateLabel = "[OP]";
+            else if(dfaState == 4) stateLabel = "[WS]";
+            
+            trace->append(QString("   Final: q%1 %2 ✓").arg(dfaState).arg(stateLabel));
+        } else {
+            trace->append("<b style='color:red;'>❌ REJECTED!</b> Not in accept state");
+            trace->append(QString("   Final: q%1 (non-accept)").arg(dfaState));
+        }
+        
         timer->stop();
         return;
     }
 
     auto &step = animationSteps[animationStep];
     
-    if(step.ch == '\0') {
-        view->highlightState(0);
-        trace->append("🔄 DFA Reset → q0 (ready for next token)");
-        dfaState = 0;
-        dfaPos = 0;
-    } else {
-        dfaState = step.toState;
-        dfaPos = step.inputPos;
-        view->highlightState(dfaState);
-        updateInputDisplay();
+    dfaState = step.toState;
+    dfaPos = step.inputPos;
+    view->highlightState(dfaState);
+    updateInputDisplay();
 
-        QString charDisplay = (step.ch == ' ') ? "␣" : (step.ch == '\t') ? "⇥" : QString(QChar(step.ch));
-        QString stateInfo = QString("q%1").arg(dfaState);
-        if(dfa[dfaState].accept && !dfa[dfaState].tokens.empty()) {
-            stateInfo += " ✓";
-        }
-        
-        trace->append(QString("q%1 --[%2]--> %3 | Token: %4")
-            .arg(step.fromState)
-            .arg(charDisplay)
-            .arg(stateInfo)
-            .arg(step.tokenName));
+    QString charDisplay = (step.ch == ' ') ? "␣" : 
+                         (step.ch == '\t') ? "⇥" : 
+                         QString(QChar(step.ch));
+    
+    QString stateInfo = QString("q%1").arg(dfaState);
+    
+    if(simplifiedDFA[dfaState].accept) {
+        QString category = "";
+        if(dfaState == 1) category = "[ID]";
+        else if(dfaState == 2) category = "[NUM]";
+        else if(dfaState == 3) category = "[OP]";
+        else if(dfaState == 4) category = "[WS]";
+        stateInfo = QString("<span style='color:green;'>q%1%2 ✓</span>")
+            .arg(dfaState).arg(category);
     }
+    
+    trace->append(QString("Step %1: q%2 --[%3]--> %4")
+        .arg(animationStep + 1)
+        .arg(step.fromState)
+        .arg(charDisplay)
+        .arg(stateInfo));
     
     animationStep++;
 }
@@ -979,4 +1133,126 @@ void MainWindow::pdaStepTimer() {
     parseTrace->append("");
     
     pdaAnimStep++;
+}
+
+void MainWindow::buildSimplifiedDFA() {
+    simplifiedDFA.clear();
+    simplifiedDFA.resize(6);
+    
+    // ===============================================
+    // q0: Start state
+    // ===============================================
+    simplifiedDFA[0].id = 0;
+    simplifiedDFA[0].accept = false;
+    
+    // From q0: initial character determines token type
+    for(char c = 'a'; c <= 'z'; c++) simplifiedDFA[0].trans[c] = 1;
+    for(char c = 'A'; c <= 'Z'; c++) simplifiedDFA[0].trans[c] = 1;
+    for(char c = '0'; c <= '9'; c++) simplifiedDFA[0].trans[c] = 2;
+    simplifiedDFA[0].trans['+'] = 3;
+    simplifiedDFA[0].trans['-'] = 3;
+    simplifiedDFA[0].trans['*'] = 3;
+    simplifiedDFA[0].trans['/'] = 3;
+    simplifiedDFA[0].trans['('] = 3;
+    simplifiedDFA[0].trans[')'] = 3;
+    simplifiedDFA[0].trans[' '] = 4;
+    simplifiedDFA[0].trans['\t'] = 4;
+    
+    // ===============================================
+    // q1: ID state (ACCEPT)
+    // ===============================================
+    simplifiedDFA[1].id = 1;
+    simplifiedDFA[1].accept = true;
+    simplifiedDFA[1].tokens.push_back(TK_ID);
+    
+    // ID continues
+    for(char c = 'a'; c <= 'z'; c++) simplifiedDFA[1].trans[c] = 1;
+    for(char c = 'A'; c <= 'Z'; c++) simplifiedDFA[1].trans[c] = 1;
+    for(char c = '0'; c <= '9'; c++) simplifiedDFA[1].trans[c] = 1;
+    simplifiedDFA[1].trans['_'] = 1;
+    
+    // ID followed by other tokens
+    simplifiedDFA[1].trans[' '] = 4;
+    simplifiedDFA[1].trans['\t'] = 4;
+    simplifiedDFA[1].trans['+'] = 3;
+    simplifiedDFA[1].trans['-'] = 3;
+    simplifiedDFA[1].trans['*'] = 3;
+    simplifiedDFA[1].trans['/'] = 3;
+    simplifiedDFA[1].trans['('] = 3;
+    simplifiedDFA[1].trans[')'] = 3;
+    
+    // ===============================================
+    // q2: NUMBER state (ACCEPT)
+    // ===============================================
+    simplifiedDFA[2].id = 2;
+    simplifiedDFA[2].accept = true;
+    simplifiedDFA[2].tokens.push_back(TK_NUMBER);
+    
+    // NUMBER continues
+    for(char c = '0'; c <= '9'; c++) simplifiedDFA[2].trans[c] = 2;
+    simplifiedDFA[2].trans['.'] = 2;
+    
+    // NUMBER followed by other tokens
+    simplifiedDFA[2].trans[' '] = 4;
+    simplifiedDFA[2].trans['\t'] = 4;
+    simplifiedDFA[2].trans['+'] = 3;
+    simplifiedDFA[2].trans['-'] = 3;
+    simplifiedDFA[2].trans['*'] = 3;
+    simplifiedDFA[2].trans['/'] = 3;
+    simplifiedDFA[2].trans['('] = 3;
+    simplifiedDFA[2].trans[')'] = 3;
+    
+    // ===============================================
+    // q3: OPERATOR state (ACCEPT)
+    // ===============================================
+    simplifiedDFA[3].id = 3;
+    simplifiedDFA[3].accept = true;
+    simplifiedDFA[3].tokens.push_back(TK_PLUS);
+    simplifiedDFA[3].tokens.push_back(TK_MINUS);
+    simplifiedDFA[3].tokens.push_back(TK_STAR);
+    simplifiedDFA[3].tokens.push_back(TK_SLASH);
+    simplifiedDFA[3].tokens.push_back(TK_LPAREN);
+    simplifiedDFA[3].tokens.push_back(TK_RPAREN);
+    
+    // OP followed by other tokens
+    for(char c = 'a'; c <= 'z'; c++) simplifiedDFA[3].trans[c] = 1;
+    for(char c = 'A'; c <= 'Z'; c++) simplifiedDFA[3].trans[c] = 1;
+    for(char c = '0'; c <= '9'; c++) simplifiedDFA[3].trans[c] = 2;
+    simplifiedDFA[3].trans[' '] = 4;
+    simplifiedDFA[3].trans['\t'] = 4;
+    simplifiedDFA[3].trans['+'] = 3;
+    simplifiedDFA[3].trans['-'] = 3;
+    simplifiedDFA[3].trans['*'] = 3;
+    simplifiedDFA[3].trans['/'] = 3;
+    simplifiedDFA[3].trans['('] = 3;
+    simplifiedDFA[3].trans[')'] = 3;
+    
+    // ===============================================
+    // q4: WHITESPACE state (ACCEPT)
+    // ===============================================
+    simplifiedDFA[4].id = 4;
+    simplifiedDFA[4].accept = true;
+    simplifiedDFA[4].tokens.push_back(TK_WS);
+    
+    // WS continues
+    simplifiedDFA[4].trans[' '] = 4;
+    simplifiedDFA[4].trans['\t'] = 4;
+    
+    // WS followed by other tokens
+    for(char c = 'a'; c <= 'z'; c++) simplifiedDFA[4].trans[c] = 1;
+    for(char c = 'A'; c <= 'Z'; c++) simplifiedDFA[4].trans[c] = 1;
+    for(char c = '0'; c <= '9'; c++) simplifiedDFA[4].trans[c] = 2;
+    simplifiedDFA[4].trans['+'] = 3;
+    simplifiedDFA[4].trans['-'] = 3;
+    simplifiedDFA[4].trans['*'] = 3;
+    simplifiedDFA[4].trans['/'] = 3;
+    simplifiedDFA[4].trans['('] = 3;
+    simplifiedDFA[4].trans[')'] = 3;
+    
+    // Debug output
+    qDebug() << "Built simplified DFA with" << simplifiedDFA.size() << "states";
+    for(size_t i = 0; i < simplifiedDFA.size(); i++) {
+        qDebug() << "  State q" << i << "- transitions:" << simplifiedDFA[i].trans.size()
+                 << "accept:" << simplifiedDFA[i].accept;
+    }
 }

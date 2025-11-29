@@ -336,6 +336,12 @@
 			"MU",
 			"3L33623U77/moc_parser.cpp",
 			null
+		],
+		[
+			"C:/Users/thoma/OneDrive/Desktop/Automata/src/validator/validator.h",
+			"MU",
+			"YJMORDTUHH/moc_validator.cpp",
+			null
 		]
 	],
 	"HEADER_EXTENSIONS" : [ "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" ],
@@ -464,6 +470,11 @@
 		],
 		[
 			"C:/Users/thoma/OneDrive/Desktop/Automata/src/parser/parser.cpp",
+			"MU",
+			null
+		],
+		[
+			"C:/Users/thoma/OneDrive/Desktop/Automata/src/validator/validator.cpp",
 			"MU",
 			null
 		]

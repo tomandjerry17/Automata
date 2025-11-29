@@ -43,6 +43,7 @@ private slots:
     void onClearOutput();
     void onBuildNFA();
     void pdaStepTimer();
+    void onAnimateParse();
 
 private:
     // UI Components
@@ -51,6 +52,7 @@ private:
     QListWidget *tokensBox;
     QListWidget *stackBox;
     QTextEdit *trace;
+    QTextEdit *outputParseBox;
     QTextEdit *parseTrace;
     QTextEdit *grammarDisplay;
     AutomataView *view;
@@ -94,6 +96,10 @@ private:
     int pdaPhase = 0;   
     QGraphicsEllipseItem *pdaQ0Circle = nullptr;
     QGraphicsEllipseItem *pdaQ1Circle = nullptr;
+    QGraphicsEllipseItem *pdaStartCircle = nullptr;
+    QGraphicsEllipseItem *pdaParseCircle = nullptr;
+    QGraphicsEllipseItem *pdaErrorCircle = nullptr;
+    QGraphicsEllipseItem *pdaAcceptCircle = nullptr;
 
     // PDA Animation
     struct PDAAnimationStep {

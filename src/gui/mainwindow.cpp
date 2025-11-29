@@ -97,7 +97,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     // Explanation label
     QLabel *explanation = new QLabel();
     explanation->setWordWrap(true);
-    explanation->setStyleSheet("QLabel { color: #555; font-size: 9pt; padding: 8px; background-color: #FFFEF0; border-left: 4px solid #4CAF50; }");
+    explanation->setStyleSheet("QLabel { color: #555; font-size: 8pt; padding: 8px; background-color: #FFFEF0; border-left: 4px solid #4CAF50; }");
     explanation->setText(
         "📊 <b>This diagram shows the COMPLETE NFA</b> built using Thompson's Construction. <br>"
         "<b>All token types (ID, NUMBER, PLUS, MINUS, STAR, SLASH, LPAREN, RPAREN, WHITESPACE) are into a single automaton with <b>consistent state numbering</b> (q0, q1, q2, ...).<br>"
@@ -154,10 +154,10 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     QTextEdit *subsetExplanation = new QTextEdit();
     subsetExplanation->setReadOnly(true);
     subsetExplanation->setMaximumHeight(40); // Reduced from 120
-    subsetExplanation->setStyleSheet("QTextEdit { background-color: #E8F4F8; font-size: 9pt; padding: 5px; }");
+    subsetExplanation->setStyleSheet("QTextEdit { background-color: #E8F4F8; font-size: 8pt; padding: 5px; }");
     subsetExplanation->setHtml(
         "<b>Subset Construction:</b> Converts NFA → DFA by treating sets of NFA states as single DFA states. "
-        "The DFA below is simplified (6 states) for educational clarity."
+        "The DFA below is simplified (5 states) for educational clarity."
     );
     tab2Layout->addWidget(subsetExplanation);
 
@@ -197,8 +197,8 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     dfaInfo = new QLabel();
     dfaInfo->setTextFormat(Qt::RichText);
     dfaInfo->setWordWrap(true);
-    dfaInfo->setMaximumHeight(100); // Reduced
-    dfaInfo->setStyleSheet("QLabel { background-color: #E8F4F8; padding: 8px; border: 1px solid #1E5F8C; border-radius: 3px; font-size: 9pt; }");
+    dfaInfo->setMinimumHeight(50); // Reduced
+    dfaInfo->setStyleSheet("QLabel { background-color: #E8F4F8; padding: 8px; border: 1px solid #1E5F8C; border-radius: 3px; font-size: 8pt; }");
     dfaInfo->setText(
         "<b>📊 Simplified Educational DFA:</b> "
         "5 states (q0-q4)"
@@ -212,7 +212,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     auto *tokensLayout = new QVBoxLayout();
     tokensLayout->addWidget(new QLabel("<b>Tokens:</b>"));
     tokensBox = new QListWidget();
-    tokensBox->setMaximumHeight(120); // Reduced from 150
+    tokensBox->setMaximumHeight(150); // Reduced from 150
     tokensBox->setStyleSheet("QListWidget { font-size: 9pt; }");
     tokensLayout->addWidget(tokensBox);
     tab2Bottom->addLayout(tokensLayout);
@@ -221,7 +221,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     traceLayout->addWidget(new QLabel("<b>Output Trace:</b>"));
     trace = new QTextEdit();
     trace->setReadOnly(true);
-    trace->setMaximumHeight(120); // Reduced from 150
+    trace->setMaximumHeight(150); // Reduced from 150
     trace->setStyleSheet("QTextEdit { font-size: 9pt; }");
     traceLayout->addWidget(trace);
     tab2Bottom->addLayout(traceLayout);
@@ -230,50 +230,57 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
 
     tabWidget->addTab(tab2, "2. DFA & Tokenization");
     
+    
     // ============================================
     // TAB 3: PDA Parser (Syntactic Analysis)
     // ============================================
     QWidget *tab3 = new QWidget();
     QVBoxLayout *tab3Layout = new QVBoxLayout(tab3);
-    
+
     QLabel *tab3Title = new QLabel("<h2 style='color:#8B4513;'>Tab 3: PDA Parser (Syntactic Analysis)</h2>");
     tab3Title->setTextFormat(Qt::RichText);
     tab3Layout->addWidget(tab3Title);
-    
+
+    // BUTTONS ROW
     auto *parseBtn = new QPushButton("Parse Expression");
+    auto *animateParseBtn = new QPushButton("Animate Parse");
     auto *stepParseBtn = new QPushButton("Step Parse");
     auto *resetParseBtn = new QPushButton("Reset Parser");
-    
+
     auto *tab3Btns = new QHBoxLayout();
     tab3Btns->addWidget(parseBtn);
+    tab3Btns->addWidget(animateParseBtn);
     tab3Btns->addWidget(stepParseBtn);
     tab3Btns->addWidget(resetParseBtn);
     tab3Layout->addLayout(tab3Btns);
 
-    // ADD THIS: Input display for parser
+    // INPUT DISPLAY for parser
     parseInputDisplay = new QLabel();
     parseInputDisplay->setStyleSheet("QLabel { background-color: #FFF8DC; padding: 5px; font-family: monospace; font-size: 11pt; border: 1px solid #8B4513; }");
     parseInputDisplay->setAlignment(Qt::AlignLeft);
     tab3Layout->addWidget(parseInputDisplay);
-    
+
     // PDA Visualization
     pdaView = new QGraphicsView();
     pdaView->setScene(new QGraphicsScene(pdaView));
     pdaView->setRenderHint(QPainter::Antialiasing);
-    pdaView->setMaximumHeight(200);
+    pdaView->setMaximumHeight(250);
     pdaView->setStyleSheet("QGraphicsView { background-color: #FFF8DC; border: 2px solid #8B4513; }");
     tab3Layout->addWidget(pdaView);
-    
-    // Stack and Grammar side by side
+
+    // Middle section: Stack and Grammar side by side
     auto *tab3Middle = new QHBoxLayout();
-    
+
+    // LEFT: Stack display
     auto *stackLayout = new QVBoxLayout();
     stackLayout->addWidget(new QLabel("<b>PDA Stack:</b>"));
     stackBox = new QListWidget();
     stackBox->setMaximumHeight(200);
+    stackBox->setStyleSheet("QListWidget { background-color: #FFFACD; font-family: 'Courier New'; font-size: 10pt; }");
     stackLayout->addWidget(stackBox);
     tab3Middle->addLayout(stackLayout);
-    
+
+    // RIGHT: Grammar and Parsing Table
     auto *grammarLayout = new QVBoxLayout();
     grammarLayout->addWidget(new QLabel("<b>LL(1) Parsing Table:</b>"));
 
@@ -289,7 +296,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     parsingTableWidget->setVerticalHeaderLabels(rowHeaders);
     parsingTableWidget->setHorizontalHeaderLabels(colHeaders);
 
-    // Fill table with productions (simplified view)
+    // Fill table with productions
     parsingTableWidget->setItem(0, 4, new QTableWidgetItem("E→TE'")); // E, (
     parsingTableWidget->setItem(0, 6, new QTableWidgetItem("E→TE'")); // E, ID
     parsingTableWidget->setItem(0, 7, new QTableWidgetItem("E→TE'")); // E, NUM
@@ -321,10 +328,10 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
 
     grammarLayout->addWidget(parsingTableWidget);
 
-    // Add CFG productions below table
+    // CFG productions below table
     grammarDisplay = new QTextEdit();
     grammarDisplay->setReadOnly(true);
-    grammarDisplay->setMaximumHeight(120);
+    grammarDisplay->setMaximumHeight(100);
     grammarDisplay->setStyleSheet("QTextEdit { background-color: #F5F5DC; font-family: 'Courier New'; font-size: 8pt; }");
     grammarDisplay->setHtml(
         "<b>Context-Free Grammar:</b><br>"
@@ -336,17 +343,27 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     );
     grammarLayout->addWidget(grammarDisplay);
     tab3Middle->addLayout(grammarLayout);
-    
+
     tab3Layout->addLayout(tab3Middle);
-    
-    // Parse trace at bottom
+
+    // OUTPUT TRACE (like Tab 2)
+    outputParseBox = new QTextEdit();
+    outputParseBox->setReadOnly(true);
+    outputParseBox->setMaximumHeight(120);
+    outputParseBox->setPlaceholderText("Output trace will appear here...");
+    outputParseBox->setStyleSheet("QTextEdit { background-color: #F0FFF0; font-family: 'Courier New'; font-size: 9pt; }");
+    tab3Layout->addWidget(new QLabel("<b>Output Trace:</b>"));
+    tab3Layout->addWidget(outputParseBox);
+
+    // PARSE TRACE (detailed steps)
     parseTrace = new QTextEdit();
     parseTrace->setReadOnly(true);
     parseTrace->setMaximumHeight(150);
-    parseTrace->setPlaceholderText("Parse trace will appear here...");
-    tab3Layout->addWidget(new QLabel("<b>Parse Trace:</b>"));
+    parseTrace->setPlaceholderText("Detailed parse trace will appear here...");
+    parseTrace->setStyleSheet("QTextEdit { background-color: #FFFAF0; font-family: 'Courier New'; font-size: 9pt; }");
+    tab3Layout->addWidget(new QLabel("<b>Detailed Parse Trace:</b>"));
     tab3Layout->addWidget(parseTrace);
-    
+
     tabWidget->addTab(tab3, "3. PDA Parser");
     
     // ============================================
@@ -378,6 +395,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     connect(clearBtn, &QPushButton::clicked, this, &MainWindow::onClearOutput);
     connect(stepParseBtn, &QPushButton::clicked, this, &MainWindow::onStepParse);
     connect(resetParseBtn, &QPushButton::clicked, this, &MainWindow::onResetParse);
+    connect(animateParseBtn, &QPushButton::clicked, this, &MainWindow::onAnimateParse);
     
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::dfaStepTimer);
@@ -408,20 +426,20 @@ void MainWindow::updateParseInputDisplay() {
         );
         
         if((int)i < currentPos) {
-            // Already consumed
-            html += QString("<span style='color: #888;'>%1 </span>").arg(tokenStr);
+            // Already consumed - gray and strikethrough
+            html += QString("<span style='color: #888; text-decoration: line-through;'>%1 </span>").arg(tokenStr);
         } else if((int)i == currentPos) {
-            // Current token being processed
+            // Current token being processed - yellow highlight
             html += QString("<span style='background-color: yellow; font-weight: bold; padding: 2px;'>%1</span> ").arg(tokenStr);
         } else {
-            // Not yet consumed
+            // Not yet consumed - normal
             html += tokenStr + " ";
         }
     }
     
     auto stack = parser.getStack();
     html += QString(" | <b>Stack Top:</b> %1").arg(
-        stack.empty() ? "$" : QString::fromStdString(stack.back())
+        stack.empty() ? "(empty)" : QString::fromStdString(stack.back())
     );
     
     html += "</body></html>";
@@ -508,56 +526,90 @@ void MainWindow::onLex() {
 }
 
 void MainWindow::onParse() {
-    trace->clear();
+    outputParseBox->clear();
     parseTrace->clear();
     
     if(tokens.empty()) {
-        trace->append("⚠ Please lex first.");
-        parseTrace->append("⚠ Please tokenize first (Tab 2).");
+        outputParseBox->append("⚠ Please tokenize first (Tab 2).");
         return;
     }
     
-    // VALIDATION BEFORE PARSING
-    parseTrace->append("🔍 Validating expression structure...");
+    // VALIDATION
+    outputParseBox->append("🔍 Validating expression structure...");
     ValidationResult validation = ExpressionValidator::validate(tokens);
     
     if(!validation.valid) {
-        parseTrace->append("<b style='color:red;'>❌ VALIDATION FAILED</b>");
-        parseTrace->append(QString("Error: %1").arg(QString::fromStdString(validation.error)));
-        trace->append("❌ Parse rejected - validation failed");
+        outputParseBox->append("<b style='color:red;'>❌ VALIDATION FAILED</b>");
+        outputParseBox->append(QString("Error: %1").arg(QString::fromStdString(validation.error)));
         return;
     }
     
-    parseTrace->append("✅ Expression structure valid");
-    parseTrace->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    outputParseBox->append("✅ Expression structure valid");
+    outputParseBox->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     
+    // PARSE SILENTLY
     parser.reset();
+    outputParseBox->append("🔨 Parsing expression...");
+    
+    bool success = parser.parseAll(tokens);
+    
+    if(success) {
+        outputParseBox->append("<b style='color:green;'>✅ PARSE ACCEPTED</b>");
+        outputParseBox->append("The expression is syntactically valid according to the grammar.");
+    } else {
+        outputParseBox->append("<b style='color:red;'>❌ PARSE REJECTED</b>");
+        outputParseBox->append("Syntax error detected in expression.");
+    }
+    
+    updateStack();
+    updateParseInputDisplay();
+}
+
+void MainWindow::onAnimateParse() {
+    outputParseBox->clear();
+    parseTrace->clear();
+    
+    if(tokens.empty()) {
+        outputParseBox->append("⚠ Please tokenize first (Tab 2).");
+        return;
+    }
+    
+    // VALIDATION
+    ValidationResult validation = ExpressionValidator::validate(tokens);
+    if(!validation.valid) {
+        outputParseBox->append("<b style='color:red;'>❌ VALIDATION FAILED</b>");
+        outputParseBox->append(QString("Error: %1").arg(QString::fromStdString(validation.error)));
+        return;
+    }
+    
+    outputParseBox->append("✅ Starting PDA animation...");
+    outputParseBox->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    
+    // Build animation steps using TEMPORARY parser
+    Parser tempParser;
+    tempParser.reset();
     pdaAnimationSteps.clear();
     
-    parseTrace->append("🔨 Analyzing expression and building PDA animation...");
-    
-    pdaAnimationSteps.push_back({"Start", "Initialize parser", "Push $ and E", "q_start"});
+    // Initial step
+    pdaAnimationSteps.push_back({"Initialize", "Push $ and E onto stack", "Start state", "q_start"});
     
     int step = 1;
-    while(!parser.isDone()) {
-        auto stackBefore = parser.getStack();
-        int posBefore = parser.getCurrentPosition();
+    while(!tempParser.isDone()) {
+        auto stackBefore = tempParser.getStack();
+        int posBefore = tempParser.getCurrentPosition();
         
-        bool success = parser.stepParse(tokens);
+        bool success = tempParser.stepParse(tokens);
         
         if(!success) {
-            pdaAnimationSteps.push_back({"Error", "❌ Parse Error", "Invalid syntax", "q_start"});
-            parseTrace->append("<b style='color:red;'>❌ REJECTED</b>");
-            trace->append("❌ Parse Rejected");
-            
-            pdaAnimStep = 0;
-            pdaTimer->start(1000);
-            return;
+            pdaAnimationSteps.push_back({"Error", "Parse failed - syntax error", "Error state reached", "q_error"});
+            outputParseBox->append("<b style='color:red;'>❌ PARSE REJECTED</b>");
+            break;
         }
         
-        auto stackAfter = parser.getStack();
-        int posAfter = parser.getCurrentPosition();
+        auto stackAfter = tempParser.getStack();
+        int posAfter = tempParser.getCurrentPosition();
         
+        // Determine what happened
         std::string stateId = "q_start";
         QString stateName = "Processing";
         QString action = "Processing";
@@ -620,21 +672,24 @@ void MainWindow::onParse() {
         }
         
         pdaAnimationSteps.push_back({stateName, action, stackOp, stateId});
-        
-        updateStack();
         step++;
     }
     
-    pdaAnimationSteps.push_back({"Accept", "✅ Input fully parsed", "Stack empty, $ matched", "q_accept"});
+    if(tempParser.isDone() && tempParser.getStack().empty()) {
+        pdaAnimationSteps.push_back({"Accept", "✅ Input fully parsed", "Stack empty, $ matched", "q_accept"});
+        outputParseBox->append("✅ Parse will accept");
+    }
     
-    parseTrace->append(QString("📊 Generated %1 animation steps").arg(pdaAnimationSteps.size()));
-    parseTrace->append("▶ Starting PDA state-by-state animation...");
-    parseTrace->append("");
-    trace->append("✅ Parse Accepted");
+    outputParseBox->append(QString("Generated %1 animation steps").arg(pdaAnimationSteps.size()));
+    outputParseBox->append("▶ Starting automatic animation...");
     
+    // Reset REAL parser for playback
+    parser.reset();
     pdaAnimStep = 0;
+    updateStack();
     updateParseInputDisplay();
-    pdaTimer->start(1200);
+    updatePDAState();
+    pdaTimer->start(1000);
 }
 
 void MainWindow::onAnimateDFA() {
@@ -815,42 +870,208 @@ void MainWindow::dfaStepTimer() {
 
 void MainWindow::onStepParse() {
     if(tokens.empty()) {
-        trace->append("⚠ Please lex first.");
-        parseTrace->append("⚠ Please tokenize first (Tab 2).");
+        outputParseBox->clear();
+        outputParseBox->append("⚠ Please tokenize first (Tab 2).");
         return;
     }
-    if(parser.isDone()) return;
     
-    auto stackBefore = parser.getStack();
-    
-    if(parser.stepParse(tokens)) {
-        updateStack();
-        updatePDAState();
-        updateParseInputDisplay();
-        
-        auto stackAfter = parser.getStack();
-        
-        if(stackBefore != stackAfter) {
-            parseTrace->append(QString("✓ Stack: %1 → %2")
-                .arg(stackBefore.empty() ? "$" : QString::fromStdString(stackBefore.back()))
-                .arg(stackAfter.empty() ? "$" : QString::fromStdString(stackAfter.back())));
+    // Initialize on first step
+    if(parser.getCurrentPosition() == 0 && parser.getStack().size() == 2) {
+        if(outputParseBox->toPlainText().isEmpty() || 
+           !outputParseBox->toPlainText().contains("Validation")) {
+            outputParseBox->clear();
+            parseTrace->clear();
+            
+            ValidationResult validation = ExpressionValidator::validate(tokens);
+            if(!validation.valid) {
+                outputParseBox->append("<b style='color:red;'>❌ VALIDATION FAILED</b>");
+                outputParseBox->append(QString("Error: %1").arg(QString::fromStdString(validation.error)));
+                return;
+            }
+            
+            outputParseBox->append("✅ Validation passed.");
+            outputParseBox->append("Click 'Step Parse' repeatedly to advance step-by-step.");
+            outputParseBox->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            parser.reset();
+            updateStack();
+            updateParseInputDisplay();
+            
+            // CRITICAL FIX: Highlight start state initially
+            if(allPDAStates.count("q_start")) {
+                for(auto &pair : allPDAStates) {
+                    QGraphicsEllipseItem *circle = pair.second;
+                    QString stateKey = QString::fromStdString(pair.first);
+                    QColor defaultColor;
+                    
+                    if(stateKey.contains("_E") || stateKey.contains("_Ep")) {
+                        defaultColor = QColor(200, 220, 255);
+                    } else if(stateKey.contains("_T") || stateKey.contains("_Tp")) {
+                        defaultColor = QColor(220, 200, 255);
+                    } else if(stateKey.contains("_F")) {
+                        defaultColor = QColor(255, 220, 180);
+                    } else if(stateKey.contains("_ID") || stateKey.contains("_NUM") || stateKey.contains("_OP")) {
+                        defaultColor = QColor(200, 255, 200);
+                    } else if(stateKey.contains("accept")) {
+                        defaultColor = QColor(144, 238, 144);
+                    } else {
+                        defaultColor = QColor(220, 230, 255);
+                    }
+                    
+                    circle->setBrush(QBrush(defaultColor));
+                    circle->setPen(QPen(Qt::black, 2));
+                }
+                
+                QGraphicsEllipseItem *startCircle = allPDAStates["q_start"];
+                startCircle->setBrush(QBrush(QColor(255, 255, 100)));
+                startCircle->setPen(QPen(Qt::red, 3));
+            }
+            
+            return;
         }
-        
-        if(parser.isDone()) {
-            trace->append("✅ Parse accepted.");
-            parseTrace->append("<b style='color:green;'>✅ Parse Complete - ACCEPTED</b>");
-        }
-    } else {
-        parseTrace->append("<b style='color:red;'>❌ Parse error</b>");
     }
+    
+    // Check if already done
+    if(parser.isDone()) {
+        if(parser.getStack().empty()) {
+            if(!outputParseBox->toPlainText().contains("COMPLETE")) {
+                outputParseBox->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                outputParseBox->append("<b style='color:green;'>✅ PARSE COMPLETE - ACCEPTED</b>");
+                
+                // CRITICAL FIX: Highlight accept state
+                if(allPDAStates.count("q_accept")) {
+                    for(auto &pair : allPDAStates) {
+                        pair.second->setBrush(QBrush(QColor(220, 230, 255)));
+                        pair.second->setPen(QPen(Qt::black, 2));
+                    }
+                    QGraphicsEllipseItem *acceptCircle = allPDAStates["q_accept"];
+                    acceptCircle->setBrush(QBrush(QColor(50, 205, 50)));
+                    acceptCircle->setPen(QPen(Qt::darkGreen, 4));
+                }
+            }
+        } else {
+            if(!outputParseBox->toPlainText().contains("COMPLETE")) {
+                outputParseBox->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                outputParseBox->append("<b style='color:red;'>❌ PARSE COMPLETE - REJECTED</b>");
+            }
+        }
+        return;
+    }
+    
+    // Perform one step
+    auto stackBefore = parser.getStack();
+    int posBefore = parser.getCurrentPosition();
+    
+    bool success = parser.stepParse(tokens);
+    
+    auto stackAfter = parser.getStack();
+    int posAfter = parser.getCurrentPosition();
+    
+    if(!success) {
+        outputParseBox->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        outputParseBox->append("<b style='color:red;'>❌ PARSE ERROR - REJECTED</b>");
+        parseTrace->append("Syntax error: unexpected token or invalid production");
+        updatePDAState();
+        return;
+    }
+    
+    // CRITICAL FIX: Determine which state we're in and highlight it!
+    std::string stateId = "q_start";
+    if(!stackBefore.empty()) {
+        std::string top = stackBefore.back();
+        
+        if(top == "E") {
+            stateId = "q_E";
+        } else if(top == "E'") {
+            stateId = "q_Ep";
+        } else if(top == "T") {
+            stateId = "q_T";
+        } else if(top == "T'") {
+            stateId = "q_Tp";
+        } else if(top == "F") {
+            stateId = "q_F";
+        } else if(top == "ID") {
+            stateId = "q_ID";
+        } else if(top == "NUMBER") {
+            stateId = "q_NUM";
+        } else if(top == "+" || top == "-" || top == "*" || top == "/" || top == "(" || top == ")") {
+            stateId = "q_OP";
+        }
+    }
+    
+    // CRITICAL FIX: Reset all states and highlight current
+    for(auto &pair : allPDAStates) {
+        QGraphicsEllipseItem *circle = pair.second;
+        QString stateKey = QString::fromStdString(pair.first);
+        QColor defaultColor;
+        
+        if(stateKey.contains("_E") || stateKey.contains("_Ep")) {
+            defaultColor = QColor(200, 220, 255);
+        } else if(stateKey.contains("_T") || stateKey.contains("_Tp")) {
+            defaultColor = QColor(220, 200, 255);
+        } else if(stateKey.contains("_F")) {
+            defaultColor = QColor(255, 220, 180);
+        } else if(stateKey.contains("_ID") || stateKey.contains("_NUM") || stateKey.contains("_OP")) {
+            defaultColor = QColor(200, 255, 200);
+        } else if(stateKey.contains("accept")) {
+            defaultColor = QColor(144, 238, 144);
+        } else {
+            defaultColor = QColor(220, 230, 255);
+        }
+        
+        circle->setBrush(QBrush(defaultColor));
+        circle->setPen(QPen(Qt::black, 2));
+    }
+    
+    // Highlight the active state
+    if(allPDAStates.count(stateId)) {
+        QGraphicsEllipseItem *activeCircle = allPDAStates[stateId];
+        activeCircle->setBrush(QBrush(QColor(255, 255, 100))); // Yellow
+        activeCircle->setPen(QPen(Qt::red, 3));
+    }
+    
+    // Log the step
+    if(!stackBefore.empty()) {
+        std::string top = stackBefore.back();
+        
+        if(top == "E" || top == "E'" || top == "T" || top == "T'" || top == "F") {
+            parseTrace->append(QString("Step: Expand %1 → production applied")
+                .arg(QString::fromStdString(top)));
+            
+            if(stackAfter.size() > stackBefore.size() - 1) {
+                QString pushed;
+                for(size_t i = stackBefore.size(); i < stackAfter.size(); i++) {
+                    pushed += QString::fromStdString(stackAfter[i]) + " ";
+                }
+                parseTrace->append(QString("      Pushed: %1").arg(pushed.trimmed()));
+            }
+        } else {
+            parseTrace->append(QString("Step: Match '%1' with token")
+                .arg(QString::fromStdString(top)));
+            if(posBefore < (int)tokens.size()) {
+                parseTrace->append(QString("      Consumed: %1")
+                    .arg(QString::fromStdString(tokens[posBefore].lexeme)));
+            }
+        }
+    }
+    
+    updateStack();
+    updateParseInputDisplay();
+    updatePDAState();
 }
 
 void MainWindow::onResetParse() {
-    resetParse();
-    trace->append("🔄 Parser reset.");
+    parser.reset();
+    pdaAnimStep = 0;
+    pdaTimer->stop();
+    
+    outputParseBox->clear();
     parseTrace->clear();
-    parseTrace->append("🔄 Parser reset - Ready to parse");
-    updateParseInputDisplay();
+    parseInputDisplay->clear();
+    
+    updateStack();
+    updatePDAState();
+    
+    outputParseBox->append("✅ Parser reset. Ready to parse.");
 }
 
 void MainWindow::onClearOutput() {
@@ -899,8 +1120,22 @@ void MainWindow::resetParse() {
 void MainWindow::updateStack() {
     stackBox->clear();
     auto stack = parser.getStack();
+    
+    // Display stack top to bottom (top at top of list)
     for(int i = stack.size() - 1; i >= 0; i--) {
-        stackBox->addItem(QString::fromStdString(stack[i]));
+        QString symbol = QString::fromStdString(stack[i]);
+        QListWidgetItem *item = new QListWidgetItem(symbol);
+        
+        // Color code different symbol types
+        if(symbol == "$") {
+            item->setBackground(QColor(255, 200, 200)); // Light red for $
+        } else if(symbol == "E" || symbol == "E'" || symbol == "T" || symbol == "T'" || symbol == "F") {
+            item->setBackground(QColor(200, 220, 255)); // Light blue for non-terminals
+        } else {
+            item->setBackground(QColor(200, 255, 200)); // Light green for terminals
+        }
+        
+        stackBox->addItem(item);
     }
 }
 
@@ -1086,12 +1321,45 @@ void MainWindow::pdaStepTimer() {
         pdaTimer->stop();
         parseTrace->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         parseTrace->append("✅ PDA animation complete!");
+        
+        // CRITICAL FIX: Highlight accept state at the end
+        if(allPDAStates.count("q_accept")) {
+            // Reset all states first
+            for(auto &pair : allPDAStates) {
+                QGraphicsEllipseItem *circle = pair.second;
+                QString stateKey = QString::fromStdString(pair.first);
+                QColor defaultColor;
+                
+                if(stateKey.contains("_E") || stateKey.contains("_Ep")) {
+                    defaultColor = QColor(200, 220, 255);
+                } else if(stateKey.contains("_T") || stateKey.contains("_Tp")) {
+                    defaultColor = QColor(220, 200, 255);
+                } else if(stateKey.contains("_F")) {
+                    defaultColor = QColor(255, 220, 180);
+                } else if(stateKey.contains("_ID") || stateKey.contains("_NUM") || stateKey.contains("_OP")) {
+                    defaultColor = QColor(200, 255, 200);
+                } else if(stateKey.contains("accept")) {
+                    defaultColor = QColor(144, 238, 144);
+                } else {
+                    defaultColor = QColor(220, 230, 255);
+                }
+                
+                circle->setBrush(QBrush(defaultColor));
+                circle->setPen(QPen(Qt::black, 2));
+            }
+            
+            // Highlight accept state with gold/bright green
+            QGraphicsEllipseItem *acceptCircle = allPDAStates["q_accept"];
+            acceptCircle->setBrush(QBrush(QColor(50, 205, 50))); // Lime green
+            acceptCircle->setPen(QPen(Qt::darkGreen, 4));
+        }
+        
         return;
     }
     
     auto &step = pdaAnimationSteps[pdaAnimStep];
     
-    // Reset all states to normal
+    // Reset all states to normal colors
     for(auto &pair : allPDAStates) {
         QGraphicsEllipseItem *circle = pair.second;
         
@@ -1131,6 +1399,18 @@ void MainWindow::pdaStepTimer() {
     parseTrace->append(QString("  → %1").arg(step.action));
     parseTrace->append(QString("  → Stack: %1").arg(step.stackOp));
     parseTrace->append("");
+    
+    // CRITICAL FIX: Actually step the parser forward!
+    // Skip step 0 (initialization), start stepping from step 1
+    if(pdaAnimStep > 0 && !parser.isDone()) {
+        parser.stepParse(tokens);
+        
+        // CRITICAL FIX: Update stack automatically during animation
+        updateStack();
+        
+        // CRITICAL FIX: Update input display to show highlighting
+        updateParseInputDisplay();
+    }
     
     pdaAnimStep++;
 }

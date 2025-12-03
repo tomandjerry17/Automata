@@ -590,7 +590,7 @@ void MainWindow::onAnimateParse() {
     tempParser.reset();
     pdaAnimationSteps.clear();
     
-    // Initial step
+    // Initial step - highlight start state
     pdaAnimationSteps.push_back({"Initialize", "Push $ and E onto stack", "Start state", "q_start"});
     
     int step = 1;
@@ -609,7 +609,7 @@ void MainWindow::onAnimateParse() {
         auto stackAfter = tempParser.getStack();
         int posAfter = tempParser.getCurrentPosition();
         
-        // Determine what happened
+        // Determine what happened based on BEFORE state
         std::string stateId = "q_start";
         QString stateName = "Processing";
         QString action = "Processing";
@@ -675,6 +675,7 @@ void MainWindow::onAnimateParse() {
         step++;
     }
     
+    // CRITICAL FIX: Add final accept step that will be displayed
     if(tempParser.isDone() && tempParser.getStack().empty()) {
         pdaAnimationSteps.push_back({"Accept", "✅ Input fully parsed", "Stack empty, $ matched", "q_accept"});
         outputParseBox->append("✅ Parse will accept");
@@ -683,12 +684,36 @@ void MainWindow::onAnimateParse() {
     outputParseBox->append(QString("Generated %1 animation steps").arg(pdaAnimationSteps.size()));
     outputParseBox->append("▶ Starting automatic animation...");
     
-    // Reset REAL parser for playback
+    // Reset REAL parser for playback (DO NOT call parser.reset() again in timer!)
     parser.reset();
     pdaAnimStep = 0;
     updateStack();
     updateParseInputDisplay();
-    updatePDAState();
+    
+    // Start with highlighting the start state
+    for(auto &pair : allPDAStates) {
+        QGraphicsEllipseItem *circle = pair.second;
+        QString stateKey = QString::fromStdString(pair.first);
+        QColor defaultColor;
+        
+        if(stateKey.contains("_E") || stateKey.contains("_Ep")) {
+            defaultColor = QColor(200, 220, 255);
+        } else if(stateKey.contains("_T") || stateKey.contains("_Tp")) {
+            defaultColor = QColor(220, 200, 255);
+        } else if(stateKey.contains("_F")) {
+            defaultColor = QColor(255, 220, 180);
+        } else if(stateKey.contains("_ID") || stateKey.contains("_NUM") || stateKey.contains("_OP")) {
+            defaultColor = QColor(200, 255, 200);
+        } else if(stateKey.contains("accept")) {
+            defaultColor = QColor(144, 238, 144);
+        } else {
+            defaultColor = QColor(220, 230, 255);
+        }
+        
+        circle->setBrush(QBrush(defaultColor));
+        circle->setPen(QPen(Qt::black, 2));
+    }
+    
     pdaTimer->start(1000);
 }
 
@@ -896,31 +921,32 @@ void MainWindow::onStepParse() {
             updateStack();
             updateParseInputDisplay();
             
-            // CRITICAL FIX: Highlight start state initially
-            if(allPDAStates.count("q_start")) {
-                for(auto &pair : allPDAStates) {
-                    QGraphicsEllipseItem *circle = pair.second;
-                    QString stateKey = QString::fromStdString(pair.first);
-                    QColor defaultColor;
-                    
-                    if(stateKey.contains("_E") || stateKey.contains("_Ep")) {
-                        defaultColor = QColor(200, 220, 255);
-                    } else if(stateKey.contains("_T") || stateKey.contains("_Tp")) {
-                        defaultColor = QColor(220, 200, 255);
-                    } else if(stateKey.contains("_F")) {
-                        defaultColor = QColor(255, 220, 180);
-                    } else if(stateKey.contains("_ID") || stateKey.contains("_NUM") || stateKey.contains("_OP")) {
-                        defaultColor = QColor(200, 255, 200);
-                    } else if(stateKey.contains("accept")) {
-                        defaultColor = QColor(144, 238, 144);
-                    } else {
-                        defaultColor = QColor(220, 230, 255);
-                    }
-                    
-                    circle->setBrush(QBrush(defaultColor));
-                    circle->setPen(QPen(Qt::black, 2));
+            // Highlight ONLY start state initially
+            for(auto &pair : allPDAStates) {
+                QGraphicsEllipseItem *circle = pair.second;
+                QString stateKey = QString::fromStdString(pair.first);
+                QColor defaultColor;
+                
+                if(stateKey.contains("_E") || stateKey.contains("_Ep")) {
+                    defaultColor = QColor(200, 220, 255);
+                } else if(stateKey.contains("_T") || stateKey.contains("_Tp")) {
+                    defaultColor = QColor(220, 200, 255);
+                } else if(stateKey.contains("_F")) {
+                    defaultColor = QColor(255, 220, 180);
+                } else if(stateKey.contains("_ID") || stateKey.contains("_NUM") || stateKey.contains("_OP")) {
+                    defaultColor = QColor(200, 255, 200);
+                } else if(stateKey.contains("accept")) {
+                    defaultColor = QColor(144, 238, 144);
+                } else {
+                    defaultColor = QColor(220, 230, 255);
                 }
                 
+                circle->setBrush(QBrush(defaultColor));
+                circle->setPen(QPen(Qt::black, 2));
+            }
+            
+            // Highlight ONLY start state
+            if(allPDAStates.count("q_start")) {
                 QGraphicsEllipseItem *startCircle = allPDAStates["q_start"];
                 startCircle->setBrush(QBrush(QColor(255, 255, 100)));
                 startCircle->setPen(QPen(Qt::red, 3));
@@ -930,28 +956,43 @@ void MainWindow::onStepParse() {
         }
     }
     
-    // Check if already done
-    if(parser.isDone()) {
-        if(parser.getStack().empty()) {
-            if(!outputParseBox->toPlainText().contains("COMPLETE")) {
-                outputParseBox->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                outputParseBox->append("<b style='color:green;'>✅ PARSE COMPLETE - ACCEPTED</b>");
+    // CRITICAL FIX: Check if parser is done AND stack is empty BEFORE stepping
+    // This is to handle the final $ matching step
+    if(parser.isDone() && parser.getStack().empty()) {
+        // Already at accept state, don't process further
+        if(!outputParseBox->toPlainText().contains("COMPLETE")) {
+            outputParseBox->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            outputParseBox->append("<b style='color:green;'>✅ PARSE COMPLETE - ACCEPTED</b>");
+            
+            // Reset all states, highlight ONLY accept
+            for(auto &pair : allPDAStates) {
+                QGraphicsEllipseItem *circle = pair.second;
+                QString stateKey = QString::fromStdString(pair.first);
+                QColor defaultColor;
                 
-                // CRITICAL FIX: Highlight accept state
-                if(allPDAStates.count("q_accept")) {
-                    for(auto &pair : allPDAStates) {
-                        pair.second->setBrush(QBrush(QColor(220, 230, 255)));
-                        pair.second->setPen(QPen(Qt::black, 2));
-                    }
-                    QGraphicsEllipseItem *acceptCircle = allPDAStates["q_accept"];
-                    acceptCircle->setBrush(QBrush(QColor(50, 205, 50)));
-                    acceptCircle->setPen(QPen(Qt::darkGreen, 4));
+                if(stateKey.contains("_E") || stateKey.contains("_Ep")) {
+                    defaultColor = QColor(200, 220, 255);
+                } else if(stateKey.contains("_T") || stateKey.contains("_Tp")) {
+                    defaultColor = QColor(220, 200, 255);
+                } else if(stateKey.contains("_F")) {
+                    defaultColor = QColor(255, 220, 180);
+                } else if(stateKey.contains("_ID") || stateKey.contains("_NUM") || stateKey.contains("_OP")) {
+                    defaultColor = QColor(200, 255, 200);
+                } else if(stateKey.contains("accept")) {
+                    defaultColor = QColor(144, 238, 144);
+                } else {
+                    defaultColor = QColor(220, 230, 255);
                 }
+                
+                circle->setBrush(QBrush(defaultColor));
+                circle->setPen(QPen(Qt::black, 2));
             }
-        } else {
-            if(!outputParseBox->toPlainText().contains("COMPLETE")) {
-                outputParseBox->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                outputParseBox->append("<b style='color:red;'>❌ PARSE COMPLETE - REJECTED</b>");
+            
+            // Highlight ONLY accept state
+            if(allPDAStates.count("q_accept")) {
+                QGraphicsEllipseItem *acceptCircle = allPDAStates["q_accept"];
+                acceptCircle->setBrush(QBrush(QColor(50, 205, 50)));
+                acceptCircle->setPen(QPen(Qt::darkGreen, 4));
             }
         }
         return;
@@ -960,6 +1001,54 @@ void MainWindow::onStepParse() {
     // Perform one step
     auto stackBefore = parser.getStack();
     int posBefore = parser.getCurrentPosition();
+    
+    // SPECIAL CASE: If stack only has $, this is the final acceptance step
+    if(stackBefore.size() == 1 && stackBefore[0] == "$") {
+        parseTrace->append("Step: Match $ (end marker) - Parse complete!");
+        
+        // One more step to consume the final $
+        bool success = parser.stepParse(tokens);
+        
+        if(success && parser.isDone() && parser.getStack().empty()) {
+            outputParseBox->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            outputParseBox->append("<b style='color:green;'>✅ PARSE COMPLETE - ACCEPTED</b>");
+            
+            // Reset all states, highlight ONLY accept
+            for(auto &pair : allPDAStates) {
+                QGraphicsEllipseItem *circle = pair.second;
+                QString stateKey = QString::fromStdString(pair.first);
+                QColor defaultColor;
+                
+                if(stateKey.contains("_E") || stateKey.contains("_Ep")) {
+                    defaultColor = QColor(200, 220, 255);
+                } else if(stateKey.contains("_T") || stateKey.contains("_Tp")) {
+                    defaultColor = QColor(220, 200, 255);
+                } else if(stateKey.contains("_F")) {
+                    defaultColor = QColor(255, 220, 180);
+                } else if(stateKey.contains("_ID") || stateKey.contains("_NUM") || stateKey.contains("_OP")) {
+                    defaultColor = QColor(200, 255, 200);
+                } else if(stateKey.contains("accept")) {
+                    defaultColor = QColor(144, 238, 144);
+                } else {
+                    defaultColor = QColor(220, 230, 255);
+                }
+                
+                circle->setBrush(QBrush(defaultColor));
+                circle->setPen(QPen(Qt::black, 2));
+            }
+            
+            // Highlight ONLY accept state
+            if(allPDAStates.count("q_accept")) {
+                QGraphicsEllipseItem *acceptCircle = allPDAStates["q_accept"];
+                acceptCircle->setBrush(QBrush(QColor(50, 205, 50)));
+                acceptCircle->setPen(QPen(Qt::darkGreen, 4));
+            }
+            
+            updateStack();
+            updateParseInputDisplay();
+        }
+        return;
+    }
     
     bool success = parser.stepParse(tokens);
     
@@ -970,11 +1059,10 @@ void MainWindow::onStepParse() {
         outputParseBox->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         outputParseBox->append("<b style='color:red;'>❌ PARSE ERROR - REJECTED</b>");
         parseTrace->append("Syntax error: unexpected token or invalid production");
-        updatePDAState();
         return;
     }
     
-    // CRITICAL FIX: Determine which state we're in and highlight it!
+    // Determine state BEFORE stepping (to match animation)
     std::string stateId = "q_start";
     if(!stackBefore.empty()) {
         std::string top = stackBefore.back();
@@ -995,10 +1083,12 @@ void MainWindow::onStepParse() {
             stateId = "q_NUM";
         } else if(top == "+" || top == "-" || top == "*" || top == "/" || top == "(" || top == ")") {
             stateId = "q_OP";
+        } else if(top == "$") {
+            stateId = "q_accept";  // $ means we're going to accept
         }
     }
     
-    // CRITICAL FIX: Reset all states and highlight current
+    // Reset ALL states to default
     for(auto &pair : allPDAStates) {
         QGraphicsEllipseItem *circle = pair.second;
         QString stateKey = QString::fromStdString(pair.first);
@@ -1014,6 +1104,8 @@ void MainWindow::onStepParse() {
             defaultColor = QColor(200, 255, 200);
         } else if(stateKey.contains("accept")) {
             defaultColor = QColor(144, 238, 144);
+        } else if(stateKey.contains("start")) {
+            defaultColor = QColor(220, 230, 255);
         } else {
             defaultColor = QColor(220, 230, 255);
         }
@@ -1022,7 +1114,7 @@ void MainWindow::onStepParse() {
         circle->setPen(QPen(Qt::black, 2));
     }
     
-    // Highlight the active state
+    // Highlight ONLY the active state
     if(allPDAStates.count(stateId)) {
         QGraphicsEllipseItem *activeCircle = allPDAStates[stateId];
         activeCircle->setBrush(QBrush(QColor(255, 255, 100))); // Yellow
@@ -1056,7 +1148,6 @@ void MainWindow::onStepParse() {
     
     updateStack();
     updateParseInputDisplay();
-    updatePDAState();
 }
 
 void MainWindow::onResetParse() {
@@ -1317,40 +1408,41 @@ void MainWindow::drawPDA() {
 }
 
 void MainWindow::pdaStepTimer() {
+    // Check if animation is complete FIRST
     if(pdaAnimStep >= (int)pdaAnimationSteps.size()) {
         pdaTimer->stop();
         parseTrace->append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         parseTrace->append("✅ PDA animation complete!");
         
         // CRITICAL FIX: Highlight accept state at the end
-        if(allPDAStates.count("q_accept")) {
-            // Reset all states first
-            for(auto &pair : allPDAStates) {
-                QGraphicsEllipseItem *circle = pair.second;
-                QString stateKey = QString::fromStdString(pair.first);
-                QColor defaultColor;
-                
-                if(stateKey.contains("_E") || stateKey.contains("_Ep")) {
-                    defaultColor = QColor(200, 220, 255);
-                } else if(stateKey.contains("_T") || stateKey.contains("_Tp")) {
-                    defaultColor = QColor(220, 200, 255);
-                } else if(stateKey.contains("_F")) {
-                    defaultColor = QColor(255, 220, 180);
-                } else if(stateKey.contains("_ID") || stateKey.contains("_NUM") || stateKey.contains("_OP")) {
-                    defaultColor = QColor(200, 255, 200);
-                } else if(stateKey.contains("accept")) {
-                    defaultColor = QColor(144, 238, 144);
-                } else {
-                    defaultColor = QColor(220, 230, 255);
-                }
-                
-                circle->setBrush(QBrush(defaultColor));
-                circle->setPen(QPen(Qt::black, 2));
+        // Reset ALL states first
+        for(auto &pair : allPDAStates) {
+            QGraphicsEllipseItem *circle = pair.second;
+            QString stateKey = QString::fromStdString(pair.first);
+            QColor defaultColor;
+            
+            if(stateKey.contains("_E") || stateKey.contains("_Ep")) {
+                defaultColor = QColor(200, 220, 255);
+            } else if(stateKey.contains("_T") || stateKey.contains("_Tp")) {
+                defaultColor = QColor(220, 200, 255);
+            } else if(stateKey.contains("_F")) {
+                defaultColor = QColor(255, 220, 180);
+            } else if(stateKey.contains("_ID") || stateKey.contains("_NUM") || stateKey.contains("_OP")) {
+                defaultColor = QColor(200, 255, 200);
+            } else if(stateKey.contains("accept")) {
+                defaultColor = QColor(144, 238, 144);
+            } else {
+                defaultColor = QColor(220, 230, 255);
             }
             
-            // Highlight accept state with gold/bright green
+            circle->setBrush(QBrush(defaultColor));
+            circle->setPen(QPen(Qt::black, 2));
+        }
+        
+        // Now highlight ONLY accept state
+        if(allPDAStates.count("q_accept")) {
             QGraphicsEllipseItem *acceptCircle = allPDAStates["q_accept"];
-            acceptCircle->setBrush(QBrush(QColor(50, 205, 50))); // Lime green
+            acceptCircle->setBrush(QBrush(QColor(50, 205, 50))); // Bright green
             acceptCircle->setPen(QPen(Qt::darkGreen, 4));
         }
         
@@ -1359,11 +1451,10 @@ void MainWindow::pdaStepTimer() {
     
     auto &step = pdaAnimationSteps[pdaAnimStep];
     
-    // Reset all states to normal colors
+    // CRITICAL FIX: Reset ALL states to default colors (including start!)
     for(auto &pair : allPDAStates) {
         QGraphicsEllipseItem *circle = pair.second;
         
-        // Determine default color based on state type
         QString stateKey = QString::fromStdString(pair.first);
         QColor defaultColor;
         
@@ -1377,6 +1468,8 @@ void MainWindow::pdaStepTimer() {
             defaultColor = QColor(200, 255, 200); // Green for terminals
         } else if(stateKey.contains("accept")) {
             defaultColor = QColor(144, 238, 144); // Green for accept
+        } else if(stateKey.contains("start")) {
+            defaultColor = QColor(220, 230, 255); // Blue for start (NOT YELLOW!)
         } else {
             defaultColor = QColor(220, 230, 255); // Default blue
         }
@@ -1385,7 +1478,7 @@ void MainWindow::pdaStepTimer() {
         circle->setPen(QPen(Qt::black, 2));
     }
     
-    // Highlight current state
+    // Highlight ONLY the current state (one at a time!)
     if(allPDAStates.count(step.stateId)) {
         QGraphicsEllipseItem *activeCircle = allPDAStates[step.stateId];
         activeCircle->setBrush(QBrush(QColor(255, 255, 100))); // Yellow
@@ -1400,16 +1493,14 @@ void MainWindow::pdaStepTimer() {
     parseTrace->append(QString("  → Stack: %1").arg(step.stackOp));
     parseTrace->append("");
     
-    // CRITICAL FIX: Actually step the parser forward!
-    // Skip step 0 (initialization), start stepping from step 1
-    if(pdaAnimStep > 0 && !parser.isDone()) {
-        parser.stepParse(tokens);
-        
-        // CRITICAL FIX: Update stack automatically during animation
-        updateStack();
-        
-        // CRITICAL FIX: Update input display to show highlighting
-        updateParseInputDisplay();
+    // CRITICAL FIX: Step parser forward ONLY if not first or last step
+    // Skip step 0 (initialization) and last step (already done)
+    if(pdaAnimStep > 0 && pdaAnimStep < (int)pdaAnimationSteps.size() - 1) {
+        if(!parser.isDone()) {
+            parser.stepParse(tokens);
+            updateStack();
+            updateParseInputDisplay();
+        }
     }
     
     pdaAnimStep++;

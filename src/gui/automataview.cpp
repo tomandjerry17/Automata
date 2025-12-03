@@ -162,7 +162,7 @@ void AutomataView::drawBidirectionalEdgeClear(int fromId, int toId,
     double distance = std::sqrt(dx*dx + dy*dy);
     double angle = std::atan2(dy, dx);
     double perpAngle = angle + M_PI/2;
-    double radius = 30;
+    double radius = 45;
     
     // INCREASED separation for clearer visibility
     double offset = 35; // Was 30, now 35
@@ -327,11 +327,13 @@ void AutomataView::buildBFSLayout() {
 }
 
 void AutomataView::createNode(int stateId, double x, double y) {
-    QGraphicsEllipseItem *e = scene()->addEllipse(x - 30, y - 30, 60, 60);
+    double radius = 45;  // Changed from 30 to 45
+    QGraphicsEllipseItem *e = scene()->addEllipse(x - radius, y - radius, 2*radius, 2*radius);
     e->setPen(QPen(Qt::black, 2));
     
     if(dfa[stateId].accept) {
-        scene()->addEllipse(x - 25, y - 25, 50, 50, QPen(Qt::black, 2));
+        double innerRadius = radius - 5;
+        scene()->addEllipse(x - innerRadius, y - innerRadius, 2*innerRadius, 2*innerRadius, QPen(Qt::black, 2));
         e->setBrush(QBrush(QColor(144, 238, 144)));
     } else {
         e->setBrush(QBrush(Qt::white));
@@ -364,15 +366,15 @@ void AutomataView::addStartArrow(int startState) {
     if(!nodes.count(startState)) return;
     
     auto &startNode = nodes[startState];
-    double arrowStartX = startNode.x - 60;
+    double arrowStartX = startNode.x - 90;
     double arrowStartY = startNode.y;
-    QLineF line(arrowStartX, arrowStartY, startNode.x - 32, startNode.y);
+    QLineF line(arrowStartX, arrowStartY, startNode.x - 47, startNode.y);
     scene()->addLine(line, QPen(Qt::darkBlue, 3));
-    drawArrowHead(arrowStartX + 20, arrowStartY, startNode.x - 32, startNode.y, Qt::darkBlue);
+    drawArrowHead(arrowStartX + 30, arrowStartY, startNode.x - 47, startNode.y, Qt::darkBlue);
     
     QGraphicsTextItem *startLabel = scene()->addText("START");
     QFont font = startLabel->font();
-    font.setPointSize(8);
+    font.setPointSize(10);
     font.setBold(true);
     startLabel->setFont(font);
     startLabel->setDefaultTextColor(Qt::darkBlue);
@@ -386,9 +388,9 @@ void AutomataView::drawSelfLoop(int stateId, const std::vector<char> &chars) {
     double loopRadius = 20;
     
     QPainterPath path;
-    path.moveTo(node.x - 10, node.y - 25);
+    path.moveTo(node.x - 10, node.y - 30);
     path.arcTo(node.x - loopRadius, node.y - 25 - loopRadius*2, 
-               loopRadius*2, loopRadius*2, -30, 240);
+               loopRadius*2, loopRadius*2, -50, 240);
     
     QPen edgePen(QColor(80, 80, 80), 2);
     QGraphicsPathItem *item = scene()->addPath(path, edgePen);
@@ -419,7 +421,7 @@ void AutomataView::drawDirectedEdge(int fromId, int toId, const std::vector<char
     double dx = to.x - from.x;
     double dy = to.y - from.y;
     double angle = std::atan2(dy, dx);
-    double radius = 30;
+    double radius = 45;
     
     QPointF start(from.x + radius * std::cos(angle), from.y + radius * std::sin(angle));
     QPointF end(to.x - radius * std::cos(angle), to.y - radius * std::sin(angle));

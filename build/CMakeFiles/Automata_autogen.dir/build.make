@@ -71,7 +71,7 @@ Automata_autogen/timestamp: C:/Qt/6.10.0/mingw_64/bin/moc.exe
 Automata_autogen/timestamp: C:/Qt/6.10.0/mingw_64/bin/uic.exe
 Automata_autogen/timestamp: CMakeFiles/Automata_autogen.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=C:\Users\thoma\OneDrive\Desktop\Automata\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic MOC and UIC for target Automata"
-	"C:\Program Files\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/thoma/OneDrive/Desktop/Automata/build/CMakeFiles/Automata_autogen.dir/AutogenInfo.json ""
+	"C:\Program Files\CMake\bin\cmake.exe" -E cmake_autogen C:/Users/thoma/OneDrive/Desktop/Automata/build/CMakeFiles/Automata_autogen.dir/AutogenInfo.json Release
 	"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/thoma/OneDrive/Desktop/Automata/build/Automata_autogen/timestamp
 
 CMakeFiles/Automata_autogen.dir/codegen:
